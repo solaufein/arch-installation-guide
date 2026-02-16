@@ -973,14 +973,3 @@ mkinitcpio -P
 - **Gaming Guide:** https://wiki.archlinux.org/title/Gaming
 
 ---
-
-**Your system is now:**
-✅ Fully configured with Btrfs and automatic snapshots  
-✅ Dual-boot ready with Windows  
-✅ NVIDIA-optimized for gaming  
-✅ Protected with firewall  
-✅ Easy rollback from GRUB boot menu  
-✅ Performance-tuned for Ryzen 7800X3D  
-✅ Ready for Steam and gaming
-
-**Enjoy your Arch Linux installation!**
