@@ -188,8 +188,8 @@ This layout is optimized for Snapper snapshots and system rollbacks:
 
 1. **Install essential packages**:
    ```bash
-   pacstrap -K /mnt base base-devel linux linux-headers linux-firmware \
-     linux-zen linux-zen-headers \
+   pacstrap -K /mnt base base-devel linux linux-headers \
+     linux-zen linux-zen-headers linux-firmware\
      btrfs-progs amd-ucode nano vim networkmanager sudo git \
      bash-completion man-db man-pages
    ```
@@ -239,6 +239,7 @@ This layout is optimized for Snapper snapshots and system rollbacks:
    locale-gen
    
    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+   echo "KEYMAP=pl" > /etc/vconsole.conf
    ```
 
 6. **Set hostname**:
@@ -291,6 +292,9 @@ This layout is optimized for Snapper snapshots and system rollbacks:
    ```bash
    echo "GRUB_DISABLE_OS_PROBER=false" >> /etc/default/grub
    ```
+   Add for default boot last saved:
+      GRUB_DEFAULT=saved
+      GRUB_SAVEDEFAULT=true
 
 3. **Mount Windows EFI partition** (if Windows is on a different disk):
    ```bash
