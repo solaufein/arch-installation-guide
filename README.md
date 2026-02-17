@@ -121,7 +121,7 @@ umount /mnt
 BTRFS_OPTS="rw,noatime,compress=zstd:1,space_cache=v2,commit=120,ssd,discard=async"
 
 mount -o ${BTRFS_OPTS},subvol=@           /dev/sda2 /mnt
-mkdir -p /mnt/{boot/efi,home,var/log,var/cache,tmp,.snapshots}
+mkdir -p /mnt/{boot,home,var/log,var/cache,tmp,.snapshots}
 
 mount -o ${BTRFS_OPTS},subvol=@home       /dev/sda2 /mnt/home
 mount -o ${BTRFS_OPTS},subvol=@log        /dev/sda2 /mnt/var/log
@@ -130,7 +130,7 @@ mount -o ${BTRFS_OPTS},subvol=@tmp        /dev/sda2 /mnt/tmp
 mount -o ${BTRFS_OPTS},subvol=@snapshots  /dev/sda2 /mnt/.snapshots
 
 # Mount EFI
-mount /dev/sda1 /mnt/boot/efi
+mount /dev/sda1 /mnt/boot
 ```
 
 ---
@@ -211,9 +211,9 @@ pacman -S limine efibootmgr
 
 # Deploy Limine EFI
 limine bios-install /dev/sda   # BIOS fallback (optional but good practice)
-cp -v /usr/share/limine/limine-uefi-cd.bin /boot/efi/
-mkdir -p /boot/efi/EFI/limine
-cp /usr/share/limine/BOOTX64.EFI /boot/efi/EFI/limine/
+cp -v /usr/share/limine/limine-uefi-cd.bin /boot/
+mkdir -p /boot/EFI/limine
+cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 # Register with UEFI
 efibootmgr --create \
@@ -229,21 +229,21 @@ efibootmgr --create \
 # Get UUIDs
 ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
 
-cat > /boot/efi/limine.conf << 'EOF'
+cat > /boot/limine.conf << 'EOF'
 # Limine Configuration
 timeout: 5
 default_entry: 1
 
 /Arch Linux (linux-zen)
     protocol: linux
-    kernel_path: boot():/vmlinuz-linux-zen
+    path: boot():/vmlinuz-linux-zen
     cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
     module_path: boot():/initramfs-linux-zen.img
     module_path: boot():/amd-ucode.img
 
 /Arch Linux (linux-zen Fallback)
     protocol: linux
-    kernel_path: boot():/vmlinuz-linux-zen
+    path: boot():/vmlinuz-linux-zen
     cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw nvidia_drm.modeset=1 nvidia_drm.fbdev=1
     module_path: boot():/initramfs-linux-zen-fallback.img
     module_path: boot():/amd-ucode.img
@@ -254,7 +254,7 @@ default_entry: 1
 EOF
 
 # Replace UUID placeholder with actual UUID
-sed -i "s/PLACEHOLDER_UUID/${ROOT_UUID}/g" /boot/efi/limine.conf
+sed -i "s/PLACEHOLDER_UUID/${ROOT_UUID}/g" /boot/limine.conf
 ```
 
 > **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
@@ -602,7 +602,7 @@ paru -S limine-snapper-sync
 
 # Configure
 sudo vim /etc/limine-snapper-sync.conf
-# Set LIMINE_CONFIG=/boot/efi/limine.conf
+# Set LIMINE_CONFIG=/boot/limine.conf
 # Set BTRFS_DEVICE=/dev/sda2
 
 # Enable service — regenerates limine.conf after each snapshot change
