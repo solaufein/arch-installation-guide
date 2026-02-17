@@ -174,11 +174,12 @@ arch-chroot /mnt
 
 ### Timezone & locale
 ```bash
-ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime  # Change to your timezone
+ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime  # Change to your timezone
 hwclock --systohc
 
 # Locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "pl_PL.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 ```
