@@ -248,6 +248,8 @@ default_entry: 1
     module_path: boot():/initramfs-linux-zen-fallback.img
     module_path: boot():/amd-ucode.img
 
+/Snapshots
+
 /Windows
     protocol: efi
     path: boot(windows)/EFI/Microsoft/Boot/bootmgfw.efi
@@ -268,6 +270,8 @@ Target = limine
 Description = Deploying Limine after upgrade...
 When = PostTransaction
 Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
+
+paru -S limine-mkinitcpio-hook
 
 ```
 
@@ -620,7 +624,8 @@ sudo vim /etc/limine-snapper-sync.conf
 # Set BTRFS_DEVICE=/dev/sda2
 
 # Enable service — regenerates limine.conf after each snapshot change
-sudo systemctl enable --now limine-snapper-sync.timer
+#sudo systemctl enable --now limine-snapper-sync.timer
+sudo systemctl enable --now limine-snapper-sync.service
 ```
 
 > After this, every snapper snapshot will get its own entry in the Limine boot menu.
