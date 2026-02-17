@@ -255,6 +255,20 @@ EOF
 
 # Replace UUID placeholder with actual UUID
 sed -i "s/PLACEHOLDER_UUID/${ROOT_UUID}/g" /boot/limine.conf
+
+# Create Limine Hook:
+/etc/pacman.d/hooks/99-limine.hook
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = limine              
+
+[Action]
+Description = Deploying Limine after upgrade...
+When = PostTransaction
+Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
+
 ```
 
 > **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
