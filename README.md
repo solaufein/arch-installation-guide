@@ -20,17 +20,24 @@
 ```bash
 loadkeys us
 setfont ter-132b        # Larger font for comfort
+
+for Polish:
+loadkeys pl
+setfont Lat2-Terminus16
 ```
 
 ### Verify UEFI boot
 ```bash
 ls /sys/firmware/efi/efivars  # Must return files
+cat /sys/firmware/efi/fw_platform_size
 ```
 
 ### Connect to the internet
 ```bash
 # Ethernet: usually auto-configured via DHCP
 ping -c 3 archlinux.org
+
+ip link
 
 # Wi-Fi (if needed):
 iwctl
