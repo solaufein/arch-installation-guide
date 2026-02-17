@@ -64,7 +64,7 @@ meaning both live on one Btrfs partition but are independently snapshotted. This
 rollback the system without touching your personal files.
 
 ```
-/dev/sda1  →  1GB   EFI System Partition (FAT32)
+/dev/sda1  →  4GB   EFI System Partition (FAT32)
 /dev/sda2  →  REST       Btrfs main partition (root + home)
 ```
 
@@ -80,7 +80,7 @@ fdisk -l /dev/sda
 sgdisk --zap-all /dev/sda
 
 # Create partitions
-sgdisk -n 1:0:+1G  -t 1:ef00 -c 1:"EFI"   /dev/sda
+sgdisk -n 1:0:+4G  -t 1:ef00 -c 1:"EFI"   /dev/sda
 sgdisk -n 2:0:0      -t 2:8300 -c 2:"ARCH"  /dev/sda
 
 # Verify
