@@ -18,8 +18,8 @@
 
 ### Set keyboard layout and font
 ```bash
-loadkeys us
-setfont ter-132b        # Larger font for comfort
+#loadkeys us
+#setfont ter-132b        # Larger font for comfort
 
 # for Polish:
 loadkeys pl
@@ -28,14 +28,13 @@ setfont Lat2-Terminus16
 
 ### Verify UEFI boot
 ```bash
-ls /sys/firmware/efi/efivars  # Must return files
 cat /sys/firmware/efi/fw_platform_size
 ```
 
 ### Connect to the internet
 ```bash
 # Ethernet: usually auto-configured via DHCP
-ping -c 3 archlinux.org
+ping ping.archlinux.org
 
 ip link
 
@@ -50,7 +49,8 @@ iwctl
 
 ### Update system clock
 ```bash
-timedatectl set-ntp true
+timedatectl
+#timedatectl set-ntp true
 timedatectl status
 ```
 
@@ -64,7 +64,7 @@ meaning both live on one Btrfs partition but are independently snapshotted. This
 rollback the system without touching your personal files.
 
 ```
-/dev/sda1  →  4GB   EFI System Partition (FAT32)
+/dev/sda1  →  4GB        EFI System Partition (FAT32)
 /dev/sda2  →  REST       Btrfs main partition (root + home)
 ```
 
@@ -139,7 +139,10 @@ mount /dev/sda1 /mnt/boot
 
 ### Select mirrors (use reflector)
 ```bash
-reflector --country "United States" --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+sudo reflector --country Germany,Austria,Switzerland,United States \
+                 --fastest 10 \
+                 --threads $(nproc) \
+                 --save /etc/pacman.d/mirrorlist
 ```
 
 ### Install base system
@@ -743,6 +746,7 @@ sudo pacman -S \
   p7zip unrar unzip \  # Archive tools
   cups \               # Printing
   cups-pdf \
+  cups-filters \
   vlc \                # Media player
   firefox \            # Browser
   flatpak \            # Flatpak support
