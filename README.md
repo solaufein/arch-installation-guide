@@ -149,7 +149,6 @@ sudo reflector --country Germany,Austria,Switzerland,United States \
 ```bash
 pacstrap -K /mnt \
   base base-devel linux-zen linux-zen-headers linux-firmware \
-  linux linux-headers \
   amd-ucode \
   btrfs-progs \
   networkmanager \
@@ -214,8 +213,8 @@ Limine is a modern, fast, and simple BIOS/UEFI bootloader.
 pacman -S limine efibootmgr
 
 # Deploy Limine EFI
-limine bios-install /dev/sda   # BIOS fallback (optional but good practice)
-cp -v /usr/share/limine/limine-uefi-cd.bin /boot/
+# limine bios-install /dev/sda   # BIOS fallback (optional but good practice)
+# cp -v /usr/share/limine/limine-uefi-cd.bin /boot/
 mkdir -p /boot/EFI/limine
 cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
@@ -224,15 +223,17 @@ efibootmgr --create \
   --disk /dev/sda \
   --part 1 \
   --label "Limine" \
-  --loader "\\EFI\\limine\\BOOTX64.EFI" \
+  --loader '\EFI\limine\BOOTX64.EFI' \
   --unicode
 ```
 
 ### Create Limine config
-```bash
 # Get UUIDs
+```bash
 ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
+```
 
+```bash
 cat > /boot/limine.conf << 'EOF'
 # Limine Configuration
 timeout: 5
@@ -258,12 +259,16 @@ default_entry: 1
     protocol: efi
     path: boot(windows)/EFI/Microsoft/Boot/bootmgfw.efi
 EOF
+```
 
 # Replace UUID placeholder with actual UUID
+```bash
 sed -i "s/PLACEHOLDER_UUID/${ROOT_UUID}/g" /boot/limine.conf
+```
 
 # Create Limine Hook:
 /etc/pacman.d/hooks/99-limine.hook
+```bash
 [Trigger]
 Operation = Install
 Operation = Upgrade
@@ -274,9 +279,15 @@ Target = limine
 Description = Deploying Limine after upgrade...
 When = PostTransaction
 Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
+```
 
+```bash
 paru -S limine-mkinitcpio-hook
+```
 
+> Some non-compliant UEFI motherboards (e.g., certain MSI boards) have non-standard or broken EFI implementations. They may not work with efibootmgr or kernel-based UEFI detection. To skip UEFI detection and registration and set Limine as the fallback boot loader at the standard EFI path esp/EFI/BOOT/BOOTX64.EFI, run:
+```bash
+# limine-install --skip-uefi --fallback
 ```
 
 > **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
