@@ -73,14 +73,14 @@ rollback the system without touching your personal files.
 ### Wipe and partition the disk
 ```bash
 # Verify your target disk
-lsblk
+lsblk -f
 fdisk -l /dev/sda
 
 # Wipe existing partition table
 sgdisk --zap-all /dev/sda
 
 # Create partitions
-sgdisk -n 1:0:+4G  -t 1:ef00 -c 1:"EFI"   /dev/sda
+sgdisk -n 1:0:+4G    -t 1:ef00 -c 1:"EFI"   /dev/sda
 sgdisk -n 2:0:0      -t 2:8300 -c 2:"ARCH"  /dev/sda
 
 # Verify
@@ -118,7 +118,7 @@ umount /mnt
 ### Mount subvolumes with optimal options
 ```bash
 # Common Btrfs mount options (optimized for SSD + NVMe)
-BTRFS_OPTS="rw,noatime,compress=zstd:1,space_cache=v2,commit=120,ssd,discard=async"
+BTRFS_OPTS="rw,noatime,compress=zstd:1,space_cache=v2,commit=120,ssd"
 
 mount -o ${BTRFS_OPTS},subvol=@           /dev/sda2 /mnt
 mkdir -p /mnt/{boot,home,var/log,var/cache,tmp,.snapshots}
@@ -139,10 +139,13 @@ mount /dev/sda1 /mnt/boot
 
 ### Select mirrors (use reflector)
 ```bash
-sudo reflector --country Germany,Austria,Switzerland,United States \
-                 --fastest 10 \
-                 --threads $(nproc) \
-                 --save /etc/pacman.d/mirrorlist
+sudo reflector --country Poland,Germany,Austria,Slovakia,Netherlands \
+                  --protocol https \
+                  --age 12 \
+                  --fastest 10 \
+                  --threads $(nproc) \
+                  --sort rate \
+                  --save /etc/pacman.d/mirrorlist
 ```
 
 ### Install base system
@@ -176,7 +179,7 @@ arch-chroot /mnt
 
 ### Timezone & locale
 ```bash
-ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime  # Change to your timezone
+ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 hwclock --systohc
 
 # Locale
@@ -243,15 +246,15 @@ default_entry: 1
     protocol: linux
     path: boot():/vmlinuz-linux-zen
     cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/initramfs-linux-zen.img
     module_path: boot():/amd-ucode.img
+    module_path: boot():/initramfs-linux-zen.img
 
 /Arch Linux (linux-zen Fallback)
     protocol: linux
     path: boot():/vmlinuz-linux-zen
     cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/initramfs-linux-zen-fallback.img
     module_path: boot():/amd-ucode.img
+    module_path: boot():/initramfs-linux-zen-fallback.img
 
 /Snapshots
 
@@ -316,57 +319,7 @@ mkinitcpio -P
 
 ---
 
-## 8. NVIDIA Driver Setup
-
-```bash
-# Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
-pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
-           nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
-
-# Prevent nouveau from loading
-cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
-blacklist nouveau
-options nouveau modeset=0
-EOF
-
-# NVIDIA DRM modesetting (required for Wayland)
-cat > /etc/modprobe.d/nvidia.conf << 'EOF'
-options nvidia_drm modeset=1 fbdev=1
-options nvidia NVreg_UsePageAttributeTable=1
-options nvidia NVreg_PreserveVideoMemoryAllocations=1
-EOF
-
-# Enable NVIDIA services for suspend/resume
-systemctl enable nvidia-suspend.service
-systemctl enable nvidia-hibernate.service
-systemctl enable nvidia-resume.service
-```
-
-### Pacman hook — rebuild NVIDIA on kernel update
-```bash
-mkdir -p /etc/pacman.d/hooks
-
-cat > /etc/pacman.d/hooks/nvidia.hook << 'EOF'
-[Trigger]
-Operation=Install
-Operation=Upgrade
-Operation=Remove
-Type=Package
-Target=linux-zen
-Target=nvidia-open-dkms
-
-[Action]
-Description=Update NVIDIA module in initcpio
-Depends=mkinitcpio
-When=PostTransaction
-NeedsTargets
-Exec=/bin/sh -c 'while read -r trg; do case $trg in linux-zen) exit 0; esac; done; /usr/bin/mkinitcpio -P'
-EOF
-```
-
----
-
-## 9. User Setup
+## 8. User Setup
 
 ```bash
 useradd -m -G wheel,audio,video,storage,optical,games,network -s /bin/bash yourusername
@@ -379,7 +332,7 @@ EDITOR=vim visudo
 
 ---
 
-## 10. Essential Services
+## 9. Essential Services
 
 ```bash
 systemctl enable NetworkManager
@@ -389,7 +342,7 @@ systemctl enable bluetooth.service     # Bluetooth
 
 ---
 
-## 11. KDE Plasma (Wayland)
+## 10. KDE Plasma (Wayland)
 
 ```bash
 pacman -S \
@@ -413,13 +366,13 @@ DisplayServer=wayland
 GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell
 
 [Wayland]
-CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1
+CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts
 EOF
 ```
 
 ---
 
-## 12. Audio (PipeWire)
+## 11. Audio (PipeWire)
 
 ```bash
 pacman -S \
@@ -433,7 +386,7 @@ pacman -S \
 
 ---
 
-## 13. Networking
+## 12. Networking
 
 ```bash
 pacman -S \
@@ -455,7 +408,7 @@ EOF
 
 ---
 
-## 14. Firewall (UFW)
+## 13. Firewall (UFW)
 
 ```bash
 pacman -S ufw
@@ -478,7 +431,7 @@ ufw status verbose
 
 ---
 
-## 15. ZRAM Swap
+## 14. ZRAM Swap
 
 ```bash
 pacman -S zram-generator
@@ -500,7 +453,7 @@ EOF
 
 ---
 
-## 16. Bluetooth
+## 15. Bluetooth
 
 ```bash
 pacman -S bluez bluez-utils blueman
@@ -509,37 +462,7 @@ systemctl enable bluetooth
 
 ---
 
-## 17. Gaming Stack
-
-```bash
-pacman -S \
-  steam \
-  lutris \
-  wine \
-  wine-mono \
-  wine-gecko \
-  winetricks \
-  gamemode \           # CPU performance governor while gaming
-  lib32-gamemode \
-  gamescope \          # Wayland gaming compositor (Valve)
-  mangohud \           # Performance overlay
-  lib32-mangohud \
-  vulkan-radeon \      # Keep for compatibility
-  lib32-vulkan-radeon \
-  mesa \
-  lib32-mesa \
-  vulkan-tools
-
-# Enable GameMode daemon
-systemctl --user enable gamemoded   # Run after first login
-```
-
-> In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
-> For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
-
----
-
-## 18. Final Steps Before First Boot
+## 16. Final Steps Before First Boot
 
 ```bash
 # Verify all critical services
@@ -668,7 +591,86 @@ grep discard /etc/fstab
 
 ---
 
-## 5. NVIDIA Fine-Tuning (Wayland)
+## 5. NVIDIA Driver Setup
+
+```bash
+# Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
+pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
+           nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
+
+# Prevent nouveau from loading
+cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
+blacklist nouveau
+options nouveau modeset=0
+EOF
+
+# NVIDIA DRM modesetting (required for Wayland)
+cat > /etc/modprobe.d/nvidia.conf << 'EOF'
+options nvidia_drm modeset=1 fbdev=1
+options nvidia NVreg_UsePageAttributeTable=1
+options nvidia NVreg_PreserveVideoMemoryAllocations=1
+EOF
+
+# Enable NVIDIA services for suspend/resume
+systemctl enable nvidia-suspend.service
+systemctl enable nvidia-hibernate.service
+systemctl enable nvidia-resume.service
+```
+
+### Pacman hook — rebuild NVIDIA on kernel update
+```bash
+mkdir -p /etc/pacman.d/hooks
+
+cat > /etc/pacman.d/hooks/nvidia.hook << 'EOF'
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Operation=Remove
+Type=Package
+Target=linux-zen
+Target=nvidia-open-dkms
+
+[Action]
+Description=Update NVIDIA module in initcpio
+Depends=mkinitcpio
+When=PostTransaction
+NeedsTargets
+Exec=/bin/sh -c 'while read -r trg; do case $trg in linux-zen) exit 0; esac; done; /usr/bin/mkinitcpio -P'
+EOF
+```
+
+---
+
+## 6. Gaming Stack
+
+```bash
+pacman -S \
+  steam \
+  lutris \
+  wine \
+  wine-mono \
+  wine-gecko \
+  winetricks \
+  gamemode \           # CPU performance governor while gaming
+  lib32-gamemode \
+  gamescope \          # Wayland gaming compositor (Valve)
+  mangohud \           # Performance overlay
+  lib32-mangohud \
+  vulkan-radeon \      # Keep for compatibility
+  lib32-vulkan-radeon \
+  mesa \
+  lib32-mesa \
+  vulkan-tools
+
+# Enable GameMode daemon
+systemctl --user enable gamemoded   # Run after first login
+```
+
+> In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
+> For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
+
+
+## 7. NVIDIA Fine-Tuning (Wayland)
 
 ```bash
 # Environment variables for Wayland NVIDIA
@@ -695,7 +697,7 @@ EOF
 
 ---
 
-## 6. AMD CPU Tuning (Ryzen 7800X3D)
+## 8. AMD CPU Tuning (Ryzen 7800X3D)
 
 ```bash
 # Install CPU power management
@@ -711,7 +713,7 @@ paru -S corectrl
 
 ---
 
-## 7. Pacman Configuration
+## 9. Pacman Configuration
 
 ```bash
 sudo vim /etc/pacman.conf
@@ -730,7 +732,7 @@ ILoveCandy        # Fun progress bar
 
 ---
 
-## 8. Reflector — Auto Mirror Updates
+## 10. Reflector — Auto Mirror Updates
 
 ```bash
 sudo pacman -S reflector
@@ -747,7 +749,7 @@ sudo systemctl enable --now reflector.timer
 
 ---
 
-## 9. Additional Useful Tools
+## 11. Additional Useful Tools
 
 ```bash
 sudo pacman -S \
@@ -772,7 +774,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 ---
 
-## 10. KDE Plasma Wayland — Final Tweaks
+## 12. KDE Plasma Wayland — Final Tweaks
 
 ```bash
 # Force Qt apps to use Wayland
@@ -790,7 +792,7 @@ sudo pacman -S flatpak-kcm
 
 ---
 
-## 11. System Update Workflow (with Snapshots)
+## 13. System Update Workflow (with Snapshots)
 
 With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
 
@@ -814,7 +816,7 @@ reboot
 
 ---
 
-## 12. Security Hardening
+## 14. Security Hardening
 
 ```bash
 # Kernel hardening sysctl
@@ -850,7 +852,7 @@ sudo sysctl --system
 
 ---
 
-## 13. Summary Checklist
+## 15. Summary Checklist
 
 | Feature                       | Package/Tool              | Status |
 |-------------------------------|---------------------------|--------|
