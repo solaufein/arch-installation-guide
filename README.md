@@ -349,25 +349,16 @@ pacman -S \
   plasma-meta \
   kde-applications-meta \
   plasma-wayland-session \
+  plasma-login-manager \
   xorg-xwayland \
-  sddm \
-  sddm-kcm \
   xdg-desktop-portal-kde \
   qt6-wayland \
   qt5-wayland
 
-systemctl enable sddm
+systemctl enable plasma-login-manager
 
-# Force Wayland for SDDM
-mkdir -p /etc/sddm.conf.d
-cat > /etc/sddm.conf.d/wayland.conf << 'EOF'
-[General]
-DisplayServer=wayland
-GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell
+> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
 
-[Wayland]
-CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts
-EOF
 ```
 
 ---
@@ -468,7 +459,7 @@ systemctl enable bluetooth
 # Verify all critical services
 systemctl enable fstrim.timer
 systemctl enable NetworkManager
-systemctl enable sddm
+systemctl enable plasma-login-manager
 systemctl enable ufw
 systemctl enable bluetooth
 
@@ -609,6 +600,7 @@ cat > /etc/modprobe.d/nvidia.conf << 'EOF'
 options nvidia_drm modeset=1 fbdev=1
 options nvidia NVreg_UsePageAttributeTable=1
 options nvidia NVreg_PreserveVideoMemoryAllocations=1
+options nvidia NVreg_EnableGpuFirmware=0
 EOF
 
 # Enable NVIDIA services for suspend/resume
@@ -674,25 +666,23 @@ systemctl --user enable gamemoded   # Run after first login
 
 ```bash
 # Environment variables for Wayland NVIDIA
-cat >> ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
+mkdir -p ~/.config/plasma-workspace/env
+
+cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
 export LIBVA_DRIVER_NAME=nvidia
 export GBM_BACKEND=nvidia-drm
 export __GLX_VENDOR_LIBRARY_NAME=nvidia
-export WLR_NO_HARDWARE_CURSORS=1          # Fix cursor issues on some compositors
-export ELECTRON_OZONE_PLATFORM_HINT=auto  # Electron apps use Wayland
-export QT_QPA_PLATFORM=wayland
-export MOZ_ENABLE_WAYLAND=1              # Firefox Wayland
+
+# Wayland native apps
+export MOZ_ENABLE_WAYLAND=1
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# VRR / GSYNC support
+export __GL_GSYNC_ALLOWED=1
+export __GL_VRR_ALLOWED=1
 EOF
 
 chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
-
-# Also set system-wide for SDDM
-sudo mkdir -p /etc/environment.d
-sudo cat > /etc/environment.d/nvidia-wayland.conf << 'EOF'
-LIBVA_DRIVER_NAME=nvidia
-GBM_BACKEND=nvidia-drm
-__GLX_VENDOR_LIBRARY_NAME=nvidia
-EOF
 ```
 
 ---
@@ -777,11 +767,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 ## 12. KDE Plasma Wayland — Final Tweaks
 
 ```bash
-# Force Qt apps to use Wayland
-echo "QT_QPA_PLATFORM=wayland" | sudo tee -a /etc/environment
 
-# Set Wayland session as default in SDDM
-# (Select "Plasma (Wayland)" at login screen first time — SDDM remembers)
 
 # Install KDE Discover backend for firmware updates
 sudo pacman -S discover packagekit-qt6 fwupd
@@ -854,28 +840,28 @@ sudo sysctl --system
 
 ## 15. Summary Checklist
 
-| Feature                       | Package/Tool              | Status |
-|-------------------------------|---------------------------|--------|
-| Btrfs subvolumes              | btrfs-progs               | ✅     |
-| Pre/Post update snapshots     | snap-pac + snapper        | ✅     |
-| Snapshot boot selection       | limine-snapper-sync       | ✅     |
-| Bootloader (dual boot)        | limine + efibootmgr       | ✅     |
-| NVIDIA Wayland                | nvidia-open-dkms          | ✅     |
-| NVIDIA pacman hook            | /etc/pacman.d/hooks/      | ✅     |
-| ZRAM swap                     | zram-generator            | ✅     |
-| SSD TRIM                      | fstrim.timer              | ✅     |
-| Firewall                      | UFW                       | ✅     |
-| KDE Plasma Wayland            | plasma-meta + sddm        | ✅     |
-| Audio                         | PipeWire + WirePlumber    | ✅     |
-| Bluetooth                     | bluez + blueman           | ✅     |
-| Gaming                        | Steam + Proton + Lutris   | ✅     |
-| AUR helper                    | paru                      | ✅     |
-| Kernel                        | linux-zen                 | ✅     |
-| CPU microcode                 | amd-ucode                 | ✅     |
-| AMD CPU tuning                | power-profiles-daemon     | ✅     |
-| Networking                    | NetworkManager + iwd      | ✅     |
-| Mirror auto-update            | reflector                 | ✅     |
-| Security hardening            | sysctl + UFW              | ✅     |
+| Feature                       | Package/Tool                       | Status |
+|-------------------------------|------------------------------------|--------|
+| Btrfs subvolumes              | btrfs-progs                        | ✅     |
+| Pre/Post update snapshots     | snap-pac + snapper                 | ✅     |
+| Snapshot boot selection       | limine-snapper-sync                | ✅     |
+| Bootloader (dual boot)        | limine + efibootmgr                | ✅     |
+| NVIDIA Wayland                | nvidia-open-dkms                   | ✅     |
+| NVIDIA pacman hook            | /etc/pacman.d/hooks/               | ✅     |
+| ZRAM swap                     | zram-generator                     | ✅     |
+| SSD TRIM                      | fstrim.timer                       | ✅     |
+| Firewall                      | UFW                                | ✅     |
+| KDE Plasma Wayland            | plasma-meta + plasma-login-manager | ✅     |
+| Audio                         | PipeWire + WirePlumber             | ✅     |
+| Bluetooth                     | bluez + blueman                    | ✅     |
+| Gaming                        | Steam + Proton + Lutris            | ✅     |
+| AUR helper                    | paru                               | ✅     |
+| Kernel                        | linux-zen                          | ✅     |
+| CPU microcode                 | amd-ucode                          | ✅     |
+| AMD CPU tuning                | power-profiles-daemon              | ✅     |
+| Networking                    | NetworkManager + iwd               | ✅     |
+| Mirror auto-update            | reflector                          | ✅     |
+| Security hardening            | sysctl + UFW                       | ✅     |
 
 ---
 
@@ -883,7 +869,6 @@ sudo sysctl --system
 
 - **Rollback procedure:** Boot the snapshot entry from Limine → verify → `snapper rollback <id>` → reboot into new default
 - **NVIDIA updates:** The pacman hook auto-rebuilds initramfs when `linux-zen` or `nvidia-open-dkms` is updated
-- **Wayland issues:** If KDE Wayland crashes, switch to Xorg temporarily via SDDM while debugging — NVIDIA Wayland support improves with each driver release
 - **7800X3D heat:** The cache dies run cooler than main cores — don't underclock manually; let AMD's own boost algorithm manage it
 - **Proton-GE:** For better game compatibility, install `paru -S proton-ge-custom` and select it per-game in Steam
 - **MangoHud:** Add `MANGOHUD=1 %command%` to Steam launch options for in-game FPS/GPU overlay
