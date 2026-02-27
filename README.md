@@ -24,10 +24,6 @@
 
 ### Set keyboard layout and font
 ```bash
-#loadkeys us
-#setfont ter-132b        # Larger font for comfort
-
-# for Polish:
 loadkeys pl
 setfont Lat2-Terminus16
 ```
