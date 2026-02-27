@@ -12,9 +12,15 @@
 
 ---
 
+#
+###########################################################################
+###########################################################################
 # PART 1 — INSTALLATION
+###########################################################################
+###########################################################################
+#
 
-## 1. Pre-Installation Setup
+##  Pre-Installation Setup
 
 ### Set keyboard layout and font
 ```bash
@@ -41,22 +47,24 @@ ip link
 # Wi-Fi (if needed):
 iwctl
   device list
+  device wlan0 set-property Powered on
   station wlan0 scan
   station wlan0 get-networks
   station wlan0 connect "SSID"
+  <Enter you wifi password>
   exit
 ```
 
 ### Update system clock
 ```bash
 timedatectl
-#timedatectl set-ntp true
+timedatectl set-ntp true
 timedatectl status
 ```
 
 ---
 
-## 2. Disk Partitioning (Btrfs + Best Practices)
+##  Disk Partitioning (Btrfs)
 
 ### Partitioning strategy
 The layout below separates `/` from `/home` at the **subvolume** level (not partition level),
@@ -98,7 +106,7 @@ mkfs.btrfs -L ARCH -f /dev/sda2
 
 ---
 
-## 3. Btrfs Subvolume Layout
+##  Btrfs Subvolume Layout
 
 ### Mount and create subvolumes
 ```bash
@@ -135,17 +143,16 @@ mount /dev/sda1 /mnt/boot
 
 ---
 
-## 4. Base System Installation
+##  Base System Installation
 
 ### Select mirrors (use reflector)
 ```bash
-sudo reflector --country Poland,Germany,Austria,Slovakia,Netherlands \
-                  --protocol https \
-                  --age 12 \
-                  --fastest 10 \
-                  --threads $(nproc) \
-                  --sort rate \
-                  --save /etc/pacman.d/mirrorlist
+sudo reflector --country Poland \
+               --protocol https \
+               --age 12 \
+               --latest 10 \
+               --sort rate \
+               --save /etc/pacman.d/mirrorlist
 ```
 
 ### Install base system
@@ -155,6 +162,7 @@ pacstrap -K /mnt \
   amd-ucode \
   btrfs-progs \
   networkmanager \
+  reflector \
   vim nano git \
   sudo \
   zstd
@@ -164,7 +172,7 @@ pacstrap -K /mnt \
 
 ---
 
-## 5. System Configuration
+##  System Configuration
 
 ### Generate fstab
 ```bash
@@ -187,6 +195,9 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "pl_PL.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+vim /etc/vconsole.conf
+KEYMAP=pl
 ```
 
 ### Hostname
@@ -207,7 +218,7 @@ passwd
 
 ---
 
-## 6. Bootloader — Limine (for Dual Boot with Windows)
+##  Bootloader — Limine (for Dual Boot with Windows)
 
 Limine is a modern, fast, and simple BIOS/UEFI bootloader.
 
@@ -297,29 +308,17 @@ paru -S limine-mkinitcpio-hook
 
 ---
 
-## 7. mkinitcpio — initramfs Hooks
+##  mkinitcpio — initramfs
 
-Configure hooks for Btrfs, NVIDIA, and encryption support.
+Creating initramfs is usually not required because mkinitcpio was run on installation kernel package with the pacstrap
 
 ```bash
-cat > /etc/mkinitcpio.conf << 'EOF'
-MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
-BINARIES=()
-FILES=()
-HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems fsck)
-COMPRESSION="zstd"
-COMPRESSION_OPTIONS=(-3)
-EOF
-
 mkinitcpio -P
 ```
 
-> Using `systemd` hook set (modern replacement for udev/etc.)
-> `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
-
 ---
 
-## 8. User Setup
+##  User Setup
 
 ```bash
 useradd -m -G wheel,audio,video,storage,optical,games,network -s /bin/bash yourusername
@@ -332,7 +331,7 @@ EDITOR=vim visudo
 
 ---
 
-## 9. Essential Services
+##  Essential Services
 
 ```bash
 systemctl enable NetworkManager
@@ -342,7 +341,7 @@ systemctl enable bluetooth.service     # Bluetooth
 
 ---
 
-## 10. KDE Plasma (Wayland)
+##  KDE Plasma (Wayland)
 
 ```bash
 pacman -S \
@@ -363,7 +362,7 @@ systemctl enable plasma-login-manager
 
 ---
 
-## 11. Audio (PipeWire)
+##  Audio (PipeWire)
 
 ```bash
 pacman -S \
@@ -377,7 +376,7 @@ pacman -S \
 
 ---
 
-## 12. Networking
+##  Networking
 
 ```bash
 pacman -S \
@@ -399,7 +398,7 @@ EOF
 
 ---
 
-## 13. Firewall (UFW)
+##  Firewall (UFW)
 
 ```bash
 pacman -S ufw
@@ -422,7 +421,7 @@ ufw status verbose
 
 ---
 
-## 14. ZRAM Swap
+##  ZRAM Swap
 
 ```bash
 pacman -S zram-generator
@@ -444,7 +443,7 @@ EOF
 
 ---
 
-## 15. Bluetooth
+##  Bluetooth
 
 ```bash
 pacman -S bluez bluez-utils blueman
@@ -453,7 +452,7 @@ systemctl enable bluetooth
 
 ---
 
-## 16. Final Steps Before First Boot
+##  Final Steps Before First Boot
 
 ```bash
 # Verify all critical services
@@ -476,11 +475,16 @@ reboot
 
 ---
 
+#
+###########################################################################
+###########################################################################
 # PART 2 — POST-INSTALLATION
-
+###########################################################################
+###########################################################################
+#
 ---
 
-## 1. First Boot & AUR Helper (paru)
+##  First Boot & AUR Helper (paru)
 
 ```bash
 # Login as your user, then:
@@ -495,7 +499,7 @@ makepkg -si
 
 ---
 
-## 2. Snapper — Btrfs Snapshots with Pre/Post System Updates
+##  Snapper — Btrfs Snapshots with Pre/Post System Updates
 
 ### Install snapper and snap-pac
 ```bash
@@ -540,7 +544,7 @@ sudo chmod a+rx /.snapshots
 
 ---
 
-## 3. Snapshot Boot Selection — grub-btrfs / Limine Snapper Sync
+##  Snapshot Boot Selection — grub-btrfs / Limine Snapper Sync
 
 For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
 
@@ -567,7 +571,7 @@ sudo systemctl enable --now limine-snapper-sync.service
 
 ---
 
-## 4. TRIM Support (SSD Optimization)
+##  TRIM Support (SSD Optimization)
 
 ```bash
 # Verify TRIM is supported
@@ -582,9 +586,12 @@ grep discard /etc/fstab
 
 ---
 
-## 5. NVIDIA Driver Setup
+##  NVIDIA Driver Setup
 
 ```bash
+# Find GPU Family name
+lspci -k -d ::03xx
+
 # Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
 pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
            nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
@@ -633,7 +640,29 @@ EOF
 
 ---
 
-## 6. Gaming Stack
+##  mkinitcpio — initramfs Hooks
+
+Configure hooks for Btrfs, NVIDIA, and encryption support.
+
+```bash
+cat > /etc/mkinitcpio.conf << 'EOF'
+MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+BINARIES=()
+FILES=()
+HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems fsck)
+COMPRESSION="zstd"
+COMPRESSION_OPTIONS=(-3)
+EOF
+
+mkinitcpio -P
+```
+
+> Using `systemd` hook set (modern replacement for udev/etc.)
+> `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
+
+---
+
+##  Gaming Stack
 
 ```bash
 pacman -S \
@@ -661,8 +690,9 @@ systemctl --user enable gamemoded   # Run after first login
 > In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
 > For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
 
+---
 
-## 7. NVIDIA Fine-Tuning (Wayland)
+##  NVIDIA Fine-Tuning (Wayland)
 
 ```bash
 # Environment variables for Wayland NVIDIA
@@ -687,7 +717,7 @@ chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 
 ---
 
-## 8. AMD CPU Tuning (Ryzen 7800X3D)
+##  AMD CPU Tuning (Ryzen 7800X3D)
 
 ```bash
 # Install CPU power management
@@ -703,7 +733,7 @@ paru -S corectrl
 
 ---
 
-## 9. Pacman Configuration
+##  Pacman Configuration
 
 ```bash
 sudo vim /etc/pacman.conf
@@ -722,13 +752,15 @@ ILoveCandy        # Fun progress bar
 
 ---
 
-## 10. Reflector — Auto Mirror Updates
+##  Reflector — Auto Mirror Updates
 
 ```bash
 sudo pacman -S reflector
 
 sudo cat > /etc/xdg/reflector/reflector.conf << 'EOF'
---country "United States"
+--country "Poland"
+--protocol https
+--age 12
 --latest 10
 --sort rate
 --save /etc/pacman.d/mirrorlist
@@ -739,7 +771,7 @@ sudo systemctl enable --now reflector.timer
 
 ---
 
-## 11. Additional Useful Tools
+##  Additional Useful Tools
 
 ```bash
 sudo pacman -S \
@@ -764,11 +796,9 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 ---
 
-## 12. KDE Plasma Wayland — Final Tweaks
+##  KDE Plasma Wayland — Final Tweaks
 
 ```bash
-
-
 # Install KDE Discover backend for firmware updates
 sudo pacman -S discover packagekit-qt6 fwupd
 
@@ -778,7 +808,7 @@ sudo pacman -S flatpak-kcm
 
 ---
 
-## 13. System Update Workflow (with Snapshots)
+##  System Update Workflow (with Snapshots)
 
 With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
 
@@ -802,7 +832,7 @@ reboot
 
 ---
 
-## 14. Security Hardening
+##  Security Hardening
 
 ```bash
 # Kernel hardening sysctl
@@ -835,33 +865,6 @@ EOF
 
 sudo sysctl --system
 ```
-
----
-
-## 15. Summary Checklist
-
-| Feature                       | Package/Tool                       | Status |
-|-------------------------------|------------------------------------|--------|
-| Btrfs subvolumes              | btrfs-progs                        | ✅     |
-| Pre/Post update snapshots     | snap-pac + snapper                 | ✅     |
-| Snapshot boot selection       | limine-snapper-sync                | ✅     |
-| Bootloader (dual boot)        | limine + efibootmgr                | ✅     |
-| NVIDIA Wayland                | nvidia-open-dkms                   | ✅     |
-| NVIDIA pacman hook            | /etc/pacman.d/hooks/               | ✅     |
-| ZRAM swap                     | zram-generator                     | ✅     |
-| SSD TRIM                      | fstrim.timer                       | ✅     |
-| Firewall                      | UFW                                | ✅     |
-| KDE Plasma Wayland            | plasma-meta + plasma-login-manager | ✅     |
-| Audio                         | PipeWire + WirePlumber             | ✅     |
-| Bluetooth                     | bluez + blueman                    | ✅     |
-| Gaming                        | Steam + Proton + Lutris            | ✅     |
-| AUR helper                    | paru                               | ✅     |
-| Kernel                        | linux-zen                          | ✅     |
-| CPU microcode                 | amd-ucode                          | ✅     |
-| AMD CPU tuning                | power-profiles-daemon              | ✅     |
-| Networking                    | NetworkManager + iwd               | ✅     |
-| Mirror auto-update            | reflector                          | ✅     |
-| Security hardening            | sysctl + UFW                       | ✅     |
 
 ---
 
