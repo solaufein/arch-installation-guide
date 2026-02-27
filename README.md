@@ -521,7 +521,7 @@ sudo vim /etc/snapper/configs/root
 # NUMBER_CLEANUP="yes"
 # NUMBER_MIN_AGE="1800"
 # NUMBER_LIMIT="10"             # Keep last 10 pre/post pairs
-# NUMBER_LIMIT_IMPORTANT="5"
+# NUMBER_LIMIT_IMPORTANT="10"
 ```
 
 ### Enable snapper services
