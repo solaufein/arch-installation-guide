@@ -753,6 +753,12 @@ sudo systemctl enable --now power-profiles-daemon
 paru -S corectrl
 ```
 
+## Printer Driver -Brother
+
+```bash
+paru -S brother-hl1210w
+```
+
 ---
 
 ##  Pacman Configuration
