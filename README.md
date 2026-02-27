@@ -1,6 +1,6 @@
 # Arch Linux Installation Guide
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
-**Target disk:** `/dev/sda` | **Kernel:** linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
+**Target disk:** `/dev/sda` | **Kernels:** linux, linux-lts, linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
 
 ---
 
@@ -154,7 +154,9 @@ sudo reflector --country Poland \
 ### Install base system
 ```bash
 pacstrap -K /mnt \
-  base base-devel linux-zen linux-zen-headers linux-firmware \
+  base base-devel linux linux-headers linux-firmware \
+  linux-lts linux-lts-headers \
+  linux-zen linux-zen-headers \
   amd-ucode \
   btrfs-progs \
   networkmanager \
@@ -249,19 +251,26 @@ cat > /boot/limine.conf << 'EOF'
 timeout: 5
 default_entry: 1
 
+/Arch Linux (linux)
+    protocol: linux
+    path: boot():/vmlinuz-linux
+    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+    module_path: boot():/amd-ucode.img
+    module_path: boot():/initramfs-linux.img
+
+/Arch Linux (linux-lts)
+    protocol: linux
+    path: boot():/vmlinuz-linux-lts
+    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+    module_path: boot():/amd-ucode.img
+    module_path: boot():/initramfs-linux-lts.img
+
 /Arch Linux (linux-zen)
     protocol: linux
     path: boot():/vmlinuz-linux-zen
     cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
     module_path: boot():/amd-ucode.img
     module_path: boot():/initramfs-linux-zen.img
-
-/Arch Linux (linux-zen Fallback)
-    protocol: linux
-    path: boot():/vmlinuz-linux-zen
-    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/amd-ucode.img
-    module_path: boot():/initramfs-linux-zen-fallback.img
 
 /Snapshots
 
@@ -290,17 +299,6 @@ Description = Deploying Limine after upgrade...
 When = PostTransaction
 Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 ```
-
-```bash
-paru -S limine-mkinitcpio-hook
-```
-
-> Some non-compliant UEFI motherboards (e.g., certain MSI boards) have non-standard or broken EFI implementations. They may not work with efibootmgr or kernel-based UEFI detection. To skip UEFI detection and registration and set Limine as the fallback boot loader at the standard EFI path esp/EFI/BOOT/BOOTX64.EFI, run:
-```bash
-# limine-install --skip-uefi --fallback
-```
-
-> **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
 
 ---
 
@@ -540,7 +538,33 @@ sudo chmod a+rx /.snapshots
 
 ---
 
-##  Snapshot Boot Selection — grub-btrfs / Limine Snapper Sync
+# Create Hook limine-mkinitcpio-hook:
+
+Automatically update kernel boot entries in /boot/limine.conf whenever kernels are installed, updated, or removed
+
+```bash
+paru -S limine-mkinitcpio-hook
+```
+
+> Commands:
+> - limine-install installs Limine to your EFI system partition.
+> - limine-install --fallback installs Limine as the default fallback boot loader.
+> - limine-update updates Limine and generates an initramfs or UKI depending on your initramfs generator:
+> - - For mkinitcpio: run limine-mkinitcpio instead of mkinitcpio
+> - limine-scan detects active EFI boot entries (dual boot) and allows you to easily add them to Limine.
+> - limine-entry-tool --remove-os "Windows Boot Manager" removes an OS entry matching the specified name, leaving its bootable files intact.
+
+
+> Some non-compliant UEFI motherboards (e.g., certain MSI boards) have non-standard or broken EFI implementations. They may not work with efibootmgr or kernel-based UEFI detection. To skip UEFI detection and registration and set Limine as the fallback boot loader at the standard EFI path /boot/EFI/BOOT/BOOTX64.EFI, run:
+```bash
+# limine-install --skip-uefi --fallback
+```
+
+> **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
+
+---
+
+##  Snapshot Boot Selection — Limine Snapper Sync
 
 For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
 
@@ -622,6 +646,8 @@ Operation=Install
 Operation=Upgrade
 Operation=Remove
 Type=Package
+Target=linux
+Target=linux-lts
 Target=linux-zen
 Target=nvidia-open-dkms
 
@@ -630,13 +656,13 @@ Description=Update NVIDIA module in initcpio
 Depends=mkinitcpio
 When=PostTransaction
 NeedsTargets
-Exec=/bin/sh -c 'while read -r trg; do case $trg in linux-zen) exit 0; esac; done; /usr/bin/mkinitcpio -P'
+Exec=/usr/bin/limine-mkinitcpio'
 EOF
 ```
 
 ---
 
-##  mkinitcpio — initramfs Hooks
+##  mkinitcpio initramfs Hooks configuration
 
 Configure hooks for Btrfs, NVIDIA, and encryption support.
 
@@ -645,7 +671,7 @@ cat > /etc/mkinitcpio.conf << 'EOF'
 MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems fsck)
+HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems btrfs-overlayfs fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 EOF
@@ -867,7 +893,7 @@ sudo sysctl --system
 ## Notes & Tips
 
 - **Rollback procedure:** Boot the snapshot entry from Limine → verify → `snapper rollback <id>` → reboot into new default
-- **NVIDIA updates:** The pacman hook auto-rebuilds initramfs when `linux-zen` or `nvidia-open-dkms` is updated
+- **NVIDIA updates:** The pacman hook auto-rebuilds initramfs when `linux` or `nvidia-open-dkms` is updated
 - **7800X3D heat:** The cache dies run cooler than main cores — don't underclock manually; let AMD's own boost algorithm manage it
 - **Proton-GE:** For better game compatibility, install `paru -S proton-ge-custom` and select it per-game in Steam
 - **MangoHud:** Add `MANGOHUD=1 %command%` to Steam launch options for in-game FPS/GPU overlay
