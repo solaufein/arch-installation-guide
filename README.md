@@ -803,8 +803,8 @@ sudo systemctl enable --now reflector.timer
 
 ```bash
 sudo pacman -S \
-  htop btop \          # System monitors
-  neofetch fastfetch \ # System info
+  btop \               # System monitors
+  fastfetch \          # System info
   bat eza fd ripgrep \ # Modern CLI tools
   p7zip unrar unzip \  # Archive tools
   cups \               # Printing
@@ -812,14 +812,23 @@ sudo pacman -S \
   cups-filters \
   vlc \                # Media player
   firefox \            # Browser
-  flatpak \            # Flatpak support
+  dolphin \
+  spectacle \
   kde-gtk-config \     # GTK theme integration with KDE
   gtk3 gtk4 \
   xdg-utils \
   xdg-user-dirs
+```
 
+---
+
+##  Flatpak
+
+```bash
+sudo pacman -S flatpak
 # Flatpak remote
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 ```
 
 ---
@@ -832,30 +841,6 @@ sudo pacman -S discover packagekit-qt6 fwupd
 
 # Flatpak integration in Discover
 sudo pacman -S flatpak-kcm
-```
-
----
-
-##  System Update Workflow (with Snapshots)
-
-With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
-
-```bash
-# Full system update (snapshots happen automatically)
-sudo pacman -Syu
-
-# Or with paru (also covers AUR)
-paru -Syu
-
-# View snapshots
-sudo snapper -c root list
-
-# Manual snapshot (e.g., before risky change)
-sudo snapper -c root create -d "Before my experiment" --type single
-
-# Rollback if something breaks
-sudo snapper -c root rollback 5   # Rollback to snapshot #5
-reboot
 ```
 
 ---
@@ -892,6 +877,30 @@ kernel.dmesg_restrict = 1
 EOF
 
 sudo sysctl --system
+```
+
+---
+
+##  System Update Workflow (with Snapshots)
+
+With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
+
+```bash
+# Full system update (snapshots happen automatically)
+sudo pacman -Syu
+
+# Or with paru (also covers AUR)
+paru -Syu
+
+# View snapshots
+sudo snapper -c root list
+
+# Manual snapshot (e.g., before risky change)
+sudo snapper -c root create -d "Before my experiment" --type single
+
+# Rollback if something breaks
+sudo snapper -c root rollback 5   # Rollback to snapshot #5
+reboot
 ```
 
 ---
