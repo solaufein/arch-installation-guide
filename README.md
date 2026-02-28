@@ -24,7 +24,7 @@
 
 ### Set keyboard layout and font
 ```bash
-loadkeys pl
+loadkeys pl2
 setfont Lat2-Terminus16
 ```
 
@@ -195,7 +195,7 @@ locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 vim /etc/vconsole.conf
-KEYMAP=pl
+KEYMAP=pl2
 ```
 
 ### Hostname
