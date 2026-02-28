@@ -824,6 +824,10 @@ sudo pacman -S \
   vlc \                # Media player
   firefox \            # Browser
   dolphin \
+  kate \
+  ark \
+  konsole \
+  plasma-nm \
   spectacle \
   kde-gtk-config \     # GTK theme integration with KDE
   gtk3 gtk4 \
