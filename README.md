@@ -744,7 +744,7 @@ sudo vim /etc/pacman.conf
 # Uncomment/add:
 Color
 VerbosePkgLists
-ParallelDownloads = 5
+ParallelDownloads = 10
 ILoveCandy        # Fun progress bar
 
 # Enable multilib (required for Steam/Wine 32-bit):
@@ -785,18 +785,36 @@ sudo pacman -S \
   cups \               # Printing
   cups-pdf \
   cups-filters \
-  vlc \                # Media player
-  firefox \            # Browser
+  vlc \               
+  firefox \            
   dolphin \
   kate \
   ark \
   konsole \
   plasma-nm \
   spectacle \
+  libreoffice-fresh \
+  gimp \
+  qbittorrent \
   kde-gtk-config \     # GTK theme integration with KDE
   gtk3 gtk4 \
   xdg-utils \
-  xdg-user-dirs
+  xdg-user-dirs \
+  jdk21-openjdk \
+  nodejs \
+  npm \
+  dbeaver \
+  pycharm-community-edition \
+  idea-community-edition \
+  python \
+  python-pip \
+  uv \
+  podman \
+  podman-compose \
+  podman-docker
+  
+  
+paru -S brave-bin visual-studio-code-bin
 ```
 
 ---
