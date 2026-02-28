@@ -246,35 +246,44 @@ ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
 ```
 
 ```bash
+# Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
+cat /etc/machine-id
+
 cat > /boot/limine.conf << 'EOF'
 # Limine Configuration
 timeout: 5
-default_entry: 1
+default_entry: 2
+remember_last_entry: yes
 
-/Arch Linux (linux)
-    protocol: linux
-    path: boot():/vmlinuz-linux
-    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/amd-ucode.img
-    module_path: boot():/initramfs-linux.img
+/+Arch Linux
+comment: Any comment
+comment: machine-id=yyyyyyyyyyyyyyyyyy
 
-/Arch Linux (linux-lts)
-    protocol: linux
-    path: boot():/vmlinuz-linux-lts
-    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/amd-ucode.img
-    module_path: boot():/initramfs-linux-lts.img
-
-/Arch Linux (linux-zen)
-    protocol: linux
-    path: boot():/vmlinuz-linux-zen
-    cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-    module_path: boot():/amd-ucode.img
-    module_path: boot():/initramfs-linux-zen.img
-
-/Snapshots
-
-/Windows
+    //linux
+        protocol: linux
+        path: boot():/vmlinuz-linux
+        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        module_path: boot():/amd-ucode.img
+        module_path: boot():/initramfs-linux.img
+    
+    //linux-lts
+        protocol: linux
+        path: boot():/vmlinuz-linux-lts
+        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        module_path: boot():/amd-ucode.img
+        module_path: boot():/initramfs-linux-lts.img
+    
+    //linux-zen
+        protocol: linux
+        path: boot():/vmlinuz-linux-zen
+        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        module_path: boot():/amd-ucode.img
+        module_path: boot():/initramfs-linux-zen.img
+    
+        //Snapshots
+        
+/+Other systems and bootloaders
+//Windows
     protocol: efi
     path: boot(windows)/EFI/Microsoft/Boot/bootmgfw.efi
 EOF
