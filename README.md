@@ -403,6 +403,7 @@ cat > /etc/systemd/zram-generator.conf << 'EOF'
 zram-size = ram / 2         # 16 GB zram from 32 GB RAM
 compression-algorithm = zstd
 swap-priority = 100
+mount-point = /dev/zram0
 fs-type = swap
 EOF
 
@@ -471,6 +472,13 @@ sudo pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/paru.git /tmp/paru
 cd /tmp/paru
 makepkg -si
+```
+
+---
+
+## Zram enable
+```bash
+sudo systemctl start /dev/zram0
 ```
 
 ---
