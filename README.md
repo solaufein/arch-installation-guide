@@ -341,14 +341,15 @@ systemctl enable bluetooth.service     # Bluetooth
 pacman -S \
   plasma-meta \
   kde-applications-meta \
-  plasma-wayland-session \
   plasma-login-manager \
-  xorg-xwayland \
-  xdg-desktop-portal-kde \
-  qt6-wayland \
-  qt5-wayland
+#  plasma-wayland-session \
+#  xorg-xwayland \
+#  xdg-desktop-portal-kde \
+#  qt6-wayland \
+#  qt5-wayland
 
-systemctl enable plasma-login-manager
+#systemctl enable plasma-login-manager
+systemctl enable plasmalogin.service
 
 > Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
 
@@ -753,10 +754,20 @@ sudo systemctl enable --now power-profiles-daemon
 paru -S corectrl
 ```
 
+---
+
 ## Printer Driver -Brother
 
 ```bash
 paru -S brother-hl1210w
+```
+
+---
+
+## KDE Plasma Mobile
+
+```bash
+paru -S plasma-mobile
 ```
 
 ---
