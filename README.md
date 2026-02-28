@@ -698,7 +698,7 @@ cat > /etc/mkinitcpio.conf << 'EOF'
 MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems btrfs-overlayfs fsck)
+HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 EOF
