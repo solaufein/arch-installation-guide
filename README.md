@@ -325,38 +325,6 @@ EDITOR=vim visudo
 
 ---
 
-##  Essential Services
-
-```bash
-systemctl enable NetworkManager
-systemctl enable fstrim.timer          # SSD TRIM (weekly)
-systemctl enable bluetooth.service     # Bluetooth
-```
-
----
-
-##  KDE Plasma (Wayland)
-
-```bash
-pacman -S \
-  plasma-meta \
-  kde-applications-meta \
-  plasma-login-manager \
-#  plasma-wayland-session \
-#  xorg-xwayland \
-#  xdg-desktop-portal-kde \
-#  qt6-wayland \
-#  qt5-wayland
-
-#systemctl enable plasma-login-manager
-systemctl enable plasmalogin.service
-
-> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
-
-```
-
----
-
 ##  Audio (PipeWire)
 
 ```bash
@@ -447,20 +415,24 @@ systemctl enable bluetooth
 
 ---
 
-##  Final Steps Before First Boot
-
+##  Essential Services Verification
 ```bash
-# Verify all critical services
-systemctl enable fstrim.timer
 systemctl enable NetworkManager
-systemctl enable plasma-login-manager
-systemctl enable ufw
+systemctl enable fstrim.timer          # SSD TRIM (weekly)
 systemctl enable bluetooth
+systemctl enable bluetooth.service   
+systemctl enable ufw
+```
+
+---
 
 # Rebuild initramfs one final time
+```bash
 mkinitcpio -P
+```
 
 # Exit chroot and unmount
+```bash
 exit
 umount -R /mnt
 reboot
@@ -490,6 +462,116 @@ sudo pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/paru.git /tmp/paru
 cd /tmp/paru
 makepkg -si
+```
+
+---
+
+##  NVIDIA Driver Setup
+
+```bash
+# Find GPU Family name
+lspci -k -d ::03xx
+
+# Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
+pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
+           nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
+
+# Prevent nouveau from loading
+cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
+blacklist nouveau
+options nouveau modeset=0
+EOF
+
+# NVIDIA DRM modesetting (required for Wayland)
+cat > /etc/modprobe.d/nvidia.conf << 'EOF'
+options nvidia_drm modeset=1 fbdev=1
+options nvidia NVreg_UsePageAttributeTable=1
+options nvidia NVreg_PreserveVideoMemoryAllocations=1
+options nvidia NVreg_EnableGpuFirmware=0
+EOF
+
+# Enable NVIDIA services for suspend/resume
+systemctl enable nvidia-suspend.service
+systemctl enable nvidia-hibernate.service
+systemctl enable nvidia-resume.service
+```
+
+### Pacman hook — rebuild NVIDIA on kernel update
+```bash
+mkdir -p /etc/pacman.d/hooks
+
+cat > /etc/pacman.d/hooks/nvidia.hook << 'EOF'
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Operation=Remove
+Type=Package
+Target=linux
+Target=linux-lts
+Target=linux-zen
+Target=nvidia-open-dkms
+
+[Action]
+Description=Update NVIDIA module in initcpio
+Depends=mkinitcpio
+When=PostTransaction
+NeedsTargets
+Exec=/usr/bin/limine-mkinitcpio'
+EOF
+```
+
+---
+
+##  KDE Plasma (Wayland)
+
+```bash
+pacman -S \
+  plasma-meta \
+  kde-applications-meta \
+  plasma-login-manager \
+#  plasma-wayland-session \
+#  xorg-xwayland \
+#  xdg-desktop-portal-kde \
+#  qt6-wayland \
+#  qt5-wayland
+
+paru -S plasma-mobile
+
+#systemctl enable plasma-login-manager
+systemctl enable plasmalogin.service
+systemctl disable sddm.service
+
+> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
+
+systemctl get-default
+> if default.target then change to multi-user.target
+systemctl set-default multi-user.target
+
+```
+
+---
+
+##  NVIDIA Fine-Tuning (Wayland)
+
+```bash
+# Environment variables for Wayland NVIDIA
+mkdir -p ~/.config/plasma-workspace/env
+
+cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
+export LIBVA_DRIVER_NAME=nvidia
+export GBM_BACKEND=nvidia-drm
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+# Wayland native apps
+export MOZ_ENABLE_WAYLAND=1
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# VRR / GSYNC support
+export __GL_GSYNC_ALLOWED=1
+export __GL_VRR_ALLOWED=1
+EOF
+
+chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 ```
 
 ---
@@ -607,62 +689,6 @@ grep discard /etc/fstab
 
 ---
 
-##  NVIDIA Driver Setup
-
-```bash
-# Find GPU Family name
-lspci -k -d ::03xx
-
-# Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
-pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
-           nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
-
-# Prevent nouveau from loading
-cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
-blacklist nouveau
-options nouveau modeset=0
-EOF
-
-# NVIDIA DRM modesetting (required for Wayland)
-cat > /etc/modprobe.d/nvidia.conf << 'EOF'
-options nvidia_drm modeset=1 fbdev=1
-options nvidia NVreg_UsePageAttributeTable=1
-options nvidia NVreg_PreserveVideoMemoryAllocations=1
-options nvidia NVreg_EnableGpuFirmware=0
-EOF
-
-# Enable NVIDIA services for suspend/resume
-systemctl enable nvidia-suspend.service
-systemctl enable nvidia-hibernate.service
-systemctl enable nvidia-resume.service
-```
-
-### Pacman hook — rebuild NVIDIA on kernel update
-```bash
-mkdir -p /etc/pacman.d/hooks
-
-cat > /etc/pacman.d/hooks/nvidia.hook << 'EOF'
-[Trigger]
-Operation=Install
-Operation=Upgrade
-Operation=Remove
-Type=Package
-Target=linux
-Target=linux-lts
-Target=linux-zen
-Target=nvidia-open-dkms
-
-[Action]
-Description=Update NVIDIA module in initcpio
-Depends=mkinitcpio
-When=PostTransaction
-NeedsTargets
-Exec=/usr/bin/limine-mkinitcpio'
-EOF
-```
-
----
-
 ##  mkinitcpio initramfs Hooks configuration
 
 Configure hooks for Btrfs, NVIDIA, and encryption support.
@@ -685,61 +711,6 @@ mkinitcpio -P
 
 ---
 
-##  Gaming Stack
-
-```bash
-pacman -S \
-  steam \
-  lutris \
-  wine \
-  wine-mono \
-  wine-gecko \
-  winetricks \
-  gamemode \           # CPU performance governor while gaming
-  lib32-gamemode \
-  gamescope \          # Wayland gaming compositor (Valve)
-  mangohud \           # Performance overlay
-  lib32-mangohud \
-  vulkan-radeon \      # Keep for compatibility
-  lib32-vulkan-radeon \
-  mesa \
-  lib32-mesa \
-  vulkan-tools
-
-# Enable GameMode daemon
-systemctl --user enable gamemoded   # Run after first login
-```
-
-> In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
-> For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
-
----
-
-##  NVIDIA Fine-Tuning (Wayland)
-
-```bash
-# Environment variables for Wayland NVIDIA
-mkdir -p ~/.config/plasma-workspace/env
-
-cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
-export LIBVA_DRIVER_NAME=nvidia
-export GBM_BACKEND=nvidia-drm
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
-# Wayland native apps
-export MOZ_ENABLE_WAYLAND=1
-export ELECTRON_OZONE_PLATFORM_HINT=auto
-
-# VRR / GSYNC support
-export __GL_GSYNC_ALLOWED=1
-export __GL_VRR_ALLOWED=1
-EOF
-
-chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
-```
-
----
-
 ##  AMD CPU Tuning (Ryzen 7800X3D)
 
 ```bash
@@ -752,22 +723,6 @@ sudo systemctl enable --now power-profiles-daemon
 
 # Install CoreCtrl for fine-grained AMD control (AUR)
 paru -S corectrl
-```
-
----
-
-## Printer Driver -Brother
-
-```bash
-paru -S brother-hl1210w
-```
-
----
-
-## KDE Plasma Mobile
-
-```bash
-paru -S plasma-mobile
 ```
 
 ---
@@ -810,7 +765,7 @@ sudo systemctl enable --now reflector.timer
 
 ---
 
-##  Additional Useful Tools
+##  Useful Tools
 
 ```bash
 sudo pacman -S \
@@ -834,6 +789,44 @@ sudo pacman -S \
   xdg-utils \
   xdg-user-dirs
 ```
+
+---
+
+## Printer Driver -Brother
+
+```bash
+paru -S brother-hl1210w
+```
+
+---
+
+##  Gaming Stack
+
+```bash
+pacman -S \
+  steam \
+  lutris \
+  wine \
+  wine-mono \
+  wine-gecko \
+  winetricks \
+  gamemode \           # CPU performance governor while gaming
+  lib32-gamemode \
+  gamescope \          # Wayland gaming compositor (Valve)
+  mangohud \           # Performance overlay
+  lib32-mangohud \
+  vulkan-radeon \      # Keep for compatibility
+  lib32-vulkan-radeon \
+  mesa \
+  lib32-mesa \
+  vulkan-tools
+
+# Enable GameMode daemon
+systemctl --user enable gamemoded   # Run after first login
+```
+
+> In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
+> For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
 
 ---
 
@@ -917,13 +910,3 @@ sudo snapper -c root create -d "Before my experiment" --type single
 sudo snapper -c root rollback 5   # Rollback to snapshot #5
 reboot
 ```
-
----
-
-## Notes & Tips
-
-- **Rollback procedure:** Boot the snapshot entry from Limine → verify → `snapper rollback <id>` → reboot into new default
-- **NVIDIA updates:** The pacman hook auto-rebuilds initramfs when `linux` or `nvidia-open-dkms` is updated
-- **7800X3D heat:** The cache dies run cooler than main cores — don't underclock manually; let AMD's own boost algorithm manage it
-- **Proton-GE:** For better game compatibility, install `paru -S proton-ge-custom` and select it per-game in Steam
-- **MangoHud:** Add `MANGOHUD=1 %command%` to Steam launch options for in-game FPS/GPU overlay
