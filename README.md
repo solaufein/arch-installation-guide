@@ -240,15 +240,14 @@ efibootmgr --create \
 ```
 
 ### Create Limine config
-# Get UUIDs
+## Get UUIDs
 ```bash
 ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
+# Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
+MACHINE_UUID=$(cat /etc/machine-id)
 ```
 
 ```bash
-# Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
-cat /etc/machine-id
-
 cat > /boot/limine.conf << 'EOF'
 # Limine Configuration
 timeout: 5
@@ -257,56 +256,40 @@ remember_last_entry: yes
 
 /+Arch Linux
 comment: Any comment
-comment: machine-id=yyyyyyyyyyyyyyyyyy
+comment: machine-id=PLACEHOLDER_MACHINE
 
     //linux
         protocol: linux
         path: boot():/vmlinuz-linux
-        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
         module_path: boot():/amd-ucode.img
         module_path: boot():/initramfs-linux.img
     
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
-        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
         module_path: boot():/amd-ucode.img
         module_path: boot():/initramfs-linux-lts.img
     
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
-        cmdline: root=UUID=PLACEHOLDER_UUID rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
         module_path: boot():/amd-ucode.img
         module_path: boot():/initramfs-linux-zen.img
     
         //Snapshots
         
 /+Other systems and bootloaders
-//Windows
-    protocol: efi
-    path: boot(windows)/EFI/Microsoft/Boot/bootmgfw.efi
+    //Windows
+        protocol: efi
+        path: uuid(1111-111-1111-1111):/EFI/Microsoft/Boot/bootmgfw.efi
 EOF
-```
 
 # Replace UUID placeholder with actual UUID
-```bash
-sed -i "s/PLACEHOLDER_UUID/${ROOT_UUID}/g" /boot/limine.conf
-```
-
-# Create Limine Hook:
-/etc/pacman.d/hooks/99-limine.hook
-```bash
-[Trigger]
-Operation = Install
-Operation = Upgrade
-Type = Package
-Target = limine              
-
-[Action]
-Description = Deploying Limine after upgrade...
-When = PostTransaction
-Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
+sed -i "s/PLACEHOLDER_ROOT/${ROOT_UUID}/g" /boot/limine.conf
+sed -i "s/PLACEHOLDER_MACHINE/${MACHINE_UUID}/g" /boot/limine.conf
 ```
 
 ---
@@ -342,9 +325,9 @@ pacman -S \
   wireplumber \
   pavucontrol \
   playerctl
-```
 
-> Services are user-level — they start automatically after first login.
+# Services are user-level — they start automatically after first login.
+```
 
 ---
 
@@ -366,6 +349,65 @@ cat > /etc/NetworkManager/conf.d/wifi-backend.conf << 'EOF'
 [device]
 wifi.backend=iwd
 EOF
+```
+
+---
+
+##  Bluetooth
+
+```bash
+pacman -S bluez bluez-utils blueman
+systemctl enable bluetooth
+```
+
+---
+
+##  Essential Services Verification
+```bash
+systemctl enable NetworkManager
+systemctl enable fstrim.timer          # SSD TRIM (weekly)
+systemctl enable bluetooth
+systemctl enable bluetooth.service   
+```
+
+---
+
+# Rebuild initramfs one final time
+```bash
+mkinitcpio -P
+```
+
+# Exit chroot and unmount
+```bash
+exit
+umount -R /mnt
+reboot
+```
+
+---
+
+---
+
+#
+###########################################################################
+###########################################################################
+# PART 2 — POST-INSTALLATION
+###########################################################################
+###########################################################################
+#
+---
+
+##  First Boot & AUR Helper (paru)
+
+```bash
+# Login as your user, then:
+sudo pacman -Syu
+
+# Install paru
+sudo pacman -S --needed git base-devel
+git clone https://aur.archlinux.org/paru.git /tmp/paru
+cd /tmp/paru
+makepkg -si
 ```
 
 ---
@@ -412,73 +454,14 @@ cat > /etc/sysctl.d/99-swap.conf << 'EOF'
 vm.swappiness = 10
 vm.vfs_cache_pressure = 50
 EOF
-```
 
----
-
-##  Bluetooth
-
-```bash
-pacman -S bluez bluez-utils blueman
-systemctl enable bluetooth
-```
-
----
-
-##  Essential Services Verification
-```bash
-systemctl enable NetworkManager
-systemctl enable fstrim.timer          # SSD TRIM (weekly)
-systemctl enable bluetooth
-systemctl enable bluetooth.service   
-systemctl enable ufw
-```
-
----
-
-# Rebuild initramfs one final time
-```bash
-mkinitcpio -P
-```
-
-# Exit chroot and unmount
-```bash
-exit
-umount -R /mnt
-reboot
-```
-
----
-
----
-
-#
-###########################################################################
-###########################################################################
-# PART 2 — POST-INSTALLATION
-###########################################################################
-###########################################################################
-#
----
-
-##  First Boot & AUR Helper (paru)
-
-```bash
-# Login as your user, then:
-sudo pacman -Syu
-
-# Install paru
-sudo pacman -S --needed git base-devel
-git clone https://aur.archlinux.org/paru.git /tmp/paru
-cd /tmp/paru
-makepkg -si
-```
-
----
-
-## Zram enable
-```bash
+# Zram enable
+sudo systemctl daemon-reload
 sudo systemctl start /dev/zram0
+sudo systemctl enable /dev/zram0
+
+# Verify zram
+zramctl
 ```
 
 ---
@@ -490,8 +473,10 @@ sudo systemctl start /dev/zram0
 lspci -k -d ::03xx
 
 # Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
-pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils \
-           nvidia-settings vulkan-icd-loader lib32-vulkan-icd-loader
+pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
+
+# Optional:
+# pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
 
 # Prevent nouveau from loading
 cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
@@ -511,9 +496,13 @@ EOF
 systemctl enable nvidia-suspend.service
 systemctl enable nvidia-hibernate.service
 systemctl enable nvidia-resume.service
+
+cat /sys/module/nvidia_drm/parameters/modeset   # should be Y
 ```
 
-### Pacman hook — rebuild NVIDIA on kernel update
+---
+
+## Pacman hook — rebuild NVIDIA on kernel update
 ```bash
 mkdir -p /etc/pacman.d/hooks
 
@@ -545,13 +534,15 @@ EOF
 pacman -S \
   plasma-meta \
   kde-applications-meta \
-  plasma-login-manager \
+  plasma-login-manager
+
 #  plasma-wayland-session \
 #  xorg-xwayland \
 #  xdg-desktop-portal-kde \
 #  qt6-wayland \
 #  qt5-wayland
 
+# Optional plasma-mobile (it install slowly)
 paru -S plasma-mobile
 
 #systemctl enable plasma-login-manager
@@ -559,10 +550,6 @@ systemctl enable plasmalogin.service
 systemctl disable sddm.service
 
 > Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
-
-systemctl get-default
-> if default.target then change to multi-user.target
-systemctl set-default multi-user.target
 
 ```
 
@@ -597,19 +584,31 @@ chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 
 ### Install snapper and snap-pac
 ```bash
-sudo pacman -S snapper snap-pac
-```
+sudo pacman -S snapper snap-pac 
+sudo pacman -S btrfs-assistant      # GUI for snapper
 
-`snap-pac` automatically creates **pre** and **post** snapshots around every `pacman` transaction.
+# snap-pac` automatically creates **pre** and **post** snapshots around every `pacman` transaction.
+```
 
 ### Configure snapper for root
 ```bash
 # Create config (snapper will use /.snapshots subvolume we already created)
 sudo snapper -c root create-config /
 
+# Optional, if there is a problem because /.snapshots subvolume already exists:
+# https://wiki.archlinux.org/title/Snapper#Configuration_of_snapper_and_mount_point
+umount /.snapshots
+rm -r /.snapshots
+sudo snapper -c root create-config /
+btrfs subvolume delete /.snapshots
+mkdir /.snapshots
+mount -a      # mount -a will use /etc/fstab configuration to mount again /.snapshots subvolume
+
 # Verify
 sudo snapper -c root list
-cat /etc/snapper/configs/root
+sudo cat /etc/snapper/configs/root
+
+todo
 ```
 
 ### Tune snapper cleanup policy
@@ -617,17 +616,17 @@ cat /etc/snapper/configs/root
 sudo vim /etc/snapper/configs/root
 
 # Set these values:
-# TIMELINE_CREATE="no"          # We don't need timeline — snap-pac handles it
-# NUMBER_CLEANUP="yes"
-# NUMBER_MIN_AGE="1800"
-# NUMBER_LIMIT="10"             # Keep last 10 pre/post pairs
-# NUMBER_LIMIT_IMPORTANT="10"
+TIMELINE_CREATE="no"          # We don't need timeline — snap-pac handles it
+NUMBER_CLEANUP="yes"
+NUMBER_MIN_AGE="1800"
+NUMBER_LIMIT="10"             # Keep last 10 pre/post pairs
+NUMBER_LIMIT_IMPORTANT="10"
 ```
 
 ### Enable snapper services
 ```bash
 sudo systemctl enable --now snapper-cleanup.timer
-sudo systemctl enable --now snapper-timeline.timer  # Optional if timeline disabled
+#sudo systemctl enable --now snapper-timeline.timer  # Optional if timeline disabled
 ```
 
 ### Allow user access to snapshots
@@ -638,7 +637,32 @@ sudo chmod a+rx /.snapshots
 
 ---
 
-# Create Hook limine-mkinitcpio-hook:
+##  Limine Snapper Sync - boot entries for each snapshot
+For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
+
+```bash
+paru -S limine-snapper-sync
+
+# Enable service — regenerates limine.conf after each snapshot change
+#sudo systemctl enable --now limine-snapper-sync.timer
+sudo systemctl enable --now limine-snapper-sync.service
+
+# Verify and trigger to check if it works
+sudo limine-snapper-sync
+
+```
+
+> After this, every snapper snapshot will get its own entry in the Limine boot menu.
+> To **rollback**: boot the snapshot, verify it works, then make it the new default subvolume:
+> ```bash
+> sudo snapper -c root list
+> sudo snapper -c root rollback <snapshot_number>
+> reboot
+> ```
+
+---
+
+## Create Hook limine-mkinitcpio-hook:
 
 Automatically update kernel boot entries in /boot/limine.conf whenever kernels are installed, updated, or removed
 
@@ -664,30 +688,20 @@ paru -S limine-mkinitcpio-hook
 
 ---
 
-##  Snapshot Boot Selection — Limine Snapper Sync
-
-For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
-
+## Create Limine Hook:
+/etc/pacman.d/hooks/99-limine.hook
 ```bash
-paru -S limine-snapper-sync
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = limine              
 
-# Configure
-sudo vim /etc/limine-snapper-sync.conf
-# Set LIMINE_CONFIG=/boot/limine.conf
-# Set BTRFS_DEVICE=/dev/sda2
-
-# Enable service — regenerates limine.conf after each snapshot change
-#sudo systemctl enable --now limine-snapper-sync.timer
-sudo systemctl enable --now limine-snapper-sync.service
+[Action]
+Description = Deploying Limine after upgrade...
+When = PostTransaction
+Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 ```
-
-> After this, every snapper snapshot will get its own entry in the Limine boot menu.
-> To **rollback**: boot the snapshot, verify it works, then make it the new default subvolume:
-> ```bash
-> sudo snapper -c root list
-> sudo snapper -c root rollback <snapshot_number>
-> reboot
-> ```
 
 ---
 
@@ -757,8 +771,8 @@ ILoveCandy        # Fun progress bar
 
 # Enable multilib (required for Steam/Wine 32-bit):
 # Uncomment [multilib] section:
-# [multilib]
-# Include = /etc/pacman.d/mirrorlist
+[multilib]
+Include = /etc/pacman.d/mirrorlist
 ```
 
 ---
@@ -769,15 +783,15 @@ ILoveCandy        # Fun progress bar
 sudo pacman -S reflector
 
 sudo cat > /etc/xdg/reflector/reflector.conf << 'EOF'
---country "Poland"
 --protocol https
 --age 12
 --latest 10
---sort rate
+--sort age
 --save /etc/pacman.d/mirrorlist
 EOF
 
 sudo systemctl enable --now reflector.timer
+sudo systemctl enable --now reflector.service
 ```
 
 ---
@@ -786,11 +800,12 @@ sudo systemctl enable --now reflector.timer
 
 ```bash
 sudo pacman -S \
-  btop \               # System monitors
-  fastfetch \          # System info
-  bat eza fd ripgrep \ # Modern CLI tools
-  p7zip unrar unzip \  # Archive tools
-  cups \               # Printing
+  zsh \
+  btop \              
+  fastfetch \          
+  bat eza fd ripgrep \ 
+  p7zip unrar unzip \  
+  cups \              
   cups-pdf \
   cups-filters \
   vlc \               
@@ -804,7 +819,7 @@ sudo pacman -S \
   libreoffice-fresh \
   gimp \
   qbittorrent \
-  kde-gtk-config \     # GTK theme integration with KDE
+  kde-gtk-config \    
   gtk3 gtk4 \
   xdg-utils \
   xdg-user-dirs \
