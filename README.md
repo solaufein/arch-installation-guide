@@ -40,7 +40,7 @@ ping ping.archlinux.org
 
 ip link
 
-# Wi-Fi (if needed):
+# Wi-Fi (if you dont have LAN internet connection):
 iwctl
   device list
   device wlan0 set-property Powered on
@@ -143,16 +143,18 @@ mount /dev/sda1 /mnt/boot
 
 ### Select mirrors (use reflector)
 ```bash
-sudo reflector --country Poland \
-               --protocol https \
+sudo reflector --protocol https \
                --age 12 \
                --latest 10 \
-               --sort rate \
+               --sort age \
                --save /etc/pacman.d/mirrorlist
 ```
 
 ### Install base system
 ```bash
+vim /mnt/etc/vconsole.conf      # We need it before because pacstrap can raise some errors about missing vconsole
+KEYMAP=pl2
+
 pacstrap -K /mnt \
   base base-devel linux linux-headers linux-firmware \
   linux-lts linux-lts-headers \
@@ -243,8 +245,13 @@ efibootmgr --create \
 ## Get UUIDs
 ```bash
 ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
+
 # Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
 MACHINE_UUID=$(cat /etc/machine-id)
+
+# Get Windows EFI FAT32 parition ID
+lsblk -f      # find Windows disk/partition FAT32 label, eg: /dev/nvme0n1p1
+WINDOWS_UUID=$(sudo blkid -s PARTUUID -o value /dev/nvme0n1p1)
 ```
 
 ```bash
@@ -261,22 +268,19 @@ comment: machine-id=PLACEHOLDER_MACHINE
     //linux
         protocol: linux
         path: boot():/vmlinuz-linux
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-        module_path: boot():/amd-ucode.img
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
         module_path: boot():/initramfs-linux.img
     
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-        module_path: boot():/amd-ucode.img
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
         module_path: boot():/initramfs-linux-lts.img
     
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash nvidia_drm.modeset=1 nvidia_drm.fbdev=1
-        module_path: boot():/amd-ucode.img
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
         module_path: boot():/initramfs-linux-zen.img
     
         //Snapshots
@@ -284,12 +288,13 @@ comment: machine-id=PLACEHOLDER_MACHINE
 /+Other systems and bootloaders
     //Windows
         protocol: efi
-        path: uuid(1111-111-1111-1111):/EFI/Microsoft/Boot/bootmgfw.efi
+        path: uuid(PLACEHOLDER_WINDOWS):/EFI/Microsoft/Boot/bootmgfw.efi
 EOF
 
 # Replace UUID placeholder with actual UUID
 sed -i "s/PLACEHOLDER_ROOT/${ROOT_UUID}/g" /boot/limine.conf
 sed -i "s/PLACEHOLDER_MACHINE/${MACHINE_UUID}/g" /boot/limine.conf
+sed -i "s/PLACEHOLDER_WINDOWS/${WINDOWS_UUID}/g" /boot/limine.conf
 ```
 
 ---
@@ -395,7 +400,6 @@ reboot
 ###########################################################################
 ###########################################################################
 #
----
 
 ##  First Boot & AUR Helper (paru)
 
@@ -460,6 +464,8 @@ sudo systemctl daemon-reload
 sudo systemctl start /dev/zram0
 sudo systemctl enable /dev/zram0
 
+reboot
+
 # Verify zram
 zramctl
 ```
@@ -502,7 +508,32 @@ cat /sys/module/nvidia_drm/parameters/modeset   # should be Y
 
 ---
 
-## Pacman hook — rebuild NVIDIA on kernel update
+##  NVIDIA Fine-Tuning (Wayland)
+
+```bash
+# Environment variables for Wayland NVIDIA
+mkdir -p ~/.config/plasma-workspace/env
+
+cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
+export LIBVA_DRIVER_NAME=nvidia
+export GBM_BACKEND=nvidia-drm
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+# Wayland native apps
+export MOZ_ENABLE_WAYLAND=1
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# VRR / GSYNC support
+export __GL_GSYNC_ALLOWED=1
+export __GL_VRR_ALLOWED=1
+EOF
+
+chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
+```
+
+---
+
+## NVIDIA Pacman hook — rebuild NVIDIA on kernel update
 ```bash
 mkdir -p /etc/pacman.d/hooks
 
@@ -531,10 +562,7 @@ EOF
 ##  KDE Plasma (Wayland)
 
 ```bash
-pacman -S \
-  plasma-meta \
-  kde-applications-meta \
-  plasma-login-manager
+pacman -S plasma-meta kde-applications-meta plasma-login-manager
 
 #  plasma-wayland-session \
 #  xorg-xwayland \
@@ -542,45 +570,23 @@ pacman -S \
 #  qt6-wayland \
 #  qt5-wayland
 
-# Optional plasma-mobile (it install slowly)
-paru -S plasma-mobile
+# Optional: plasma-mobile (it install slowly)
+# paru -S plasma-mobile
 
 #systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
 systemctl disable sddm.service
 
-> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline, if not, then add it
+> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline
 
-```
-
----
-
-##  NVIDIA Fine-Tuning (Wayland)
-
-```bash
-# Environment variables for Wayland NVIDIA
-mkdir -p ~/.config/plasma-workspace/env
-
-cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
-export LIBVA_DRIVER_NAME=nvidia
-export GBM_BACKEND=nvidia-drm
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
-# Wayland native apps
-export MOZ_ENABLE_WAYLAND=1
-export ELECTRON_OZONE_PLATFORM_HINT=auto
-
-# VRR / GSYNC support
-export __GL_GSYNC_ALLOWED=1
-export __GL_VRR_ALLOWED=1
-EOF
-
-chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
+reboot
 ```
 
 ---
 
 ##  Snapper — Btrfs Snapshots with Pre/Post System Updates
+
+https://wiki.archlinux.org/title/Snapper#Creating_a_new_configuration
 
 ### Install snapper and snap-pac
 ```bash
@@ -597,6 +603,7 @@ sudo snapper -c root create-config /
 
 # Optional, if there is a problem because /.snapshots subvolume already exists:
 # https://wiki.archlinux.org/title/Snapper#Configuration_of_snapper_and_mount_point
+# https://www.reddit.com/r/archlinux/comments/1327vh7/snapper_config_fail/
 umount /.snapshots
 rm -r /.snapshots
 sudo snapper -c root create-config /
@@ -638,7 +645,9 @@ sudo chmod a+rx /.snapshots
 ---
 
 ##  Limine Snapper Sync - boot entries for each snapshot
+
 For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
+https://wiki.archlinux.org/title/Limine#Snapper_snapshot_integration_for_Btrfs
 
 ```bash
 paru -S limine-snapper-sync
@@ -735,18 +744,37 @@ COMPRESSION_OPTIONS=(-3)
 EOF
 
 mkinitcpio -P
-```
 
-> Using `systemd` hook set (modern replacement for udev/etc.)
-> `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
+# Using `systemd` hook set (modern replacement for udev/etc.)
+# `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
+
+reboot
+```
 
 ---
 
-##  AMD CPU Tuning (Ryzen 7800X3D)
+## Verify microcode
+
+  https://wiki.archlinux.org/title/Microcode#mkinitcpio
+  https://wiki.archlinux.org/title/Microcode#Limine
+
+```bash
+lsinitcpio --early /boot/initramfs-linux.img | grep microcode 
+
+# Should print:
+#kernel/x86/microcode/
+#kernel/x86/microcode/AuthenticAMD.bin
+```
+
+---
+
+##  Optional: AMD CPU Tuning (Ryzen 7800X3D)
+
+https://wiki.archlinux.org/title/KDE#Power_management
 
 ```bash
 # Install CPU power management
-sudo pacman -S power-profiles-daemon ryzen-smu-dkms
+sudo pacman -S power-profiles-daemon powerdevil
 
 # Limit peak power slightly (optional — 7800X3D runs hot under load)
 # Ryzen power plans via KDE Power Management (power-profiles-daemon)
