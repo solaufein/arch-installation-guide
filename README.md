@@ -411,7 +411,7 @@ lspci -k -d ::03xx
 
 # Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
 pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
-pacman -S sudo pacman -S nvidia-vaapi-driver libva-utils
+pacman -S nvidia-vaapi-driver libva-utils
 pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
 
 # Prevent nouveau from loading
