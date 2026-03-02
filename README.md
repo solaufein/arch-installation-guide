@@ -983,11 +983,28 @@ sudo pacman -Syu
 # Or with paru (also covers AUR)
 paru -Syu
 
+# List packages installed by you (from pacman)
+pacman -Qen
+
+# List packages installed by you (except pacman, eg from paru)
+pacman -Qem
+
+# Export packages to txt file
+pacman -Qeq > my_packages.txt
+
 # Remove package, not used dependencies and config files
 sudo pacman -Rns xxx
 
+# Check orphaned packages
+sudo pacman -Qdt
+
 # Cleanup orphaned packages after removal
 sudo pacman -Qtdq | sudo pacman -Rns -
+# OR:
+sudo pacman -Rns $(pacman -Qtdq)
+
+# Cleanup pacman cache (required package: pacman-contrib)
+sudo paccache -r
 
 # View snapshots
 sudo snapper -c root list
