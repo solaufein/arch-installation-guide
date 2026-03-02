@@ -839,11 +839,7 @@ sudo pacman -S \
   gimp \
   qbittorrent
 
-sudo pacman -S \
-  kde-gtk-config \    
-  gtk3 gtk4 \
-  xdg-utils \
-  xdg-user-dirs \
+sudo pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 reboot
 xdg-user-dirs-update
 
