@@ -402,64 +402,6 @@ makepkg -si
 
 ---
 
-##  Firewall (UFW)
-https://wiki.archlinux.org/title/Uncomplicated_Firewall
-
-```bash
-pacman -S ufw
-
-# Default policies
-ufw default deny incoming
-ufw default allow outgoing
-
-# Allow common services
-ufw allow ssh
-ufw allow 1900/udp   # UPnP/SSDP (KDE Connect, etc.)
-ufw allow 5353/udp   # mDNS
-
-# Enable
-ufw enable
-ufw status verbose
-
-# Start and enable "ufw.service" to make it available at boot. 
-# Note that this will not work if "iptables.service" is also enabled
-systemctl enable --now ufw
-```
-
----
-
-##  ZRAM Swap
-https://wiki.archlinux.org/title/Zram#Using_zram-generator
-
-```bash
-pacman -S zram-generator
-
-vim /etc/systemd/zram-generator.conf
-[zram0]
-zram-size = ram / 2         # 16 GB zram from 32 GB RAM
-compression-algorithm = zstd
-swap-priority = 100
-mount-point = /dev/zram0
-fs-type = swap
-
-# Tune swappiness (lower = use RAM more aggressively)
-vim /etc/sysctl.d/99-swap.conf
-vm.swappiness = 10
-vm.vfs_cache_pressure = 50
-
-# Zram enable
-sudo systemctl daemon-reload
-sudo systemctl start /dev/zram0
-sudo systemctl enable /dev/zram0
-
-reboot
-
-# Verify zram
-zramctl
-```
-
----
-
 ##  NVIDIA Driver Setup
 https://wiki.archlinux.org/title/NVIDIA
 
@@ -563,6 +505,137 @@ systemctl disable sddm.service
 
 reboot
 ```
+
+---
+
+##  mkinitcpio initramfs HOOKS/MODULES configuration
+Configure HOOKS for Btrfs, NVIDIA, and encryption support.
+
+```bash
+vim /etc/mkinitcpio.conf
+MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+BINARIES=()
+FILES=()
+HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems fsck)
+COMPRESSION="zstd"
+COMPRESSION_OPTIONS=(-3)
+
+mkinitcpio -P
+
+# Using `systemd` hook set (modern replacement for udev/etc.)
+# `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
+
+reboot
+```
+
+---
+
+## Verify microcode (amd_ucode)
+  https://wiki.archlinux.org/title/Microcode#mkinitcpio
+  https://wiki.archlinux.org/title/Microcode#Limine
+
+```bash
+lsinitcpio --early /boot/initramfs-linux.img | grep microcode 
+
+# Should print:
+#kernel/x86/microcode/
+#kernel/x86/microcode/AuthenticAMD.bin
+```
+
+---
+
+##  Pacman Configuration
+```bash
+sudo vim /etc/pacman.conf
+# Uncomment/add:
+Color
+VerbosePkgLists
+ParallelDownloads = 10
+ILoveCandy        
+
+# Enable multilib (required for Steam/Wine 32-bit):
+# Uncomment [multilib] section:
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+```
+
+---
+
+##  Reflector — Auto Mirror Updates
+```bash
+sudo pacman -S reflector
+
+sudo cat > /etc/xdg/reflector/reflector.conf << 'EOF'
+--protocol https
+--age 12
+--latest 10
+--sort age
+--save /etc/pacman.d/mirrorlist
+EOF
+
+sudo systemctl enable --now reflector.timer
+sudo systemctl enable --now reflector.service
+```
+
+---
+
+##  ZRAM Swap
+https://wiki.archlinux.org/title/Zram#Using_zram-generator
+
+```bash
+pacman -S zram-generator
+
+vim /etc/systemd/zram-generator.conf
+[zram0]
+zram-size = ram / 2         # 16 GB zram from 32 GB RAM
+compression-algorithm = zstd
+swap-priority = 100
+mount-point = /dev/zram0
+fs-type = swap
+
+# Tune swappiness (lower = use RAM more aggressively)
+vim /etc/sysctl.d/99-swap.conf
+vm.swappiness = 10
+vm.vfs_cache_pressure = 50
+
+# Zram enable services
+sudo systemctl daemon-reload
+sudo systemctl start /dev/zram0
+sudo systemctl enable /dev/zram0
+
+reboot
+
+# Verify zram
+zramctl
+```
+
+---
+
+##  Firewall (UFW)
+https://wiki.archlinux.org/title/Uncomplicated_Firewall
+
+```bash
+pacman -S ufw
+
+# Default policies
+ufw default deny incoming
+ufw default allow outgoing
+
+# Allow common services
+ufw allow ssh
+ufw allow 1900/udp   # UPnP/SSDP (KDE Connect, etc.)
+ufw allow 5353/udp   # mDNS
+
+# Enable
+ufw enable
+ufw status verbose
+
+# Start and enable "ufw.service" to make it available at boot. 
+# Note that this will not work if "iptables.service" is also enabled
+systemctl enable --now ufw
+```
+
+---
 
 ## ZSH SHELL
 https://wiki.archlinux.org/title/Zsh
@@ -707,7 +780,7 @@ sudo limine-snapper-sync
 
 ---
 
-## Create Hook limine-mkinitcpio-hook:
+## Create limine-mkinitcpio-hook:
 Automatically update kernel boot entries in /boot/limine.conf whenever kernels are installed, updated, or removed
 
 ```bash
@@ -743,77 +816,6 @@ Target = limine
 Description = Deploying Limine after upgrade...
 When = PostTransaction
 Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
-```
-
----
-
-##  mkinitcpio initramfs HOOKS/MODULES configuration
-Configure HOOKS for Btrfs, NVIDIA, and encryption support.
-
-```bash
-vim /etc/mkinitcpio.conf
-MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
-BINARIES=()
-FILES=()
-HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems fsck)
-COMPRESSION="zstd"
-COMPRESSION_OPTIONS=(-3)
-
-mkinitcpio -P
-
-# Using `systemd` hook set (modern replacement for udev/etc.)
-# `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
-
-reboot
-```
-
----
-
-## Verify microcode (amd_ucode)
-  https://wiki.archlinux.org/title/Microcode#mkinitcpio
-  https://wiki.archlinux.org/title/Microcode#Limine
-
-```bash
-lsinitcpio --early /boot/initramfs-linux.img | grep microcode 
-
-# Should print:
-#kernel/x86/microcode/
-#kernel/x86/microcode/AuthenticAMD.bin
-```
-
----
-
-##  Pacman Configuration
-```bash
-sudo vim /etc/pacman.conf
-# Uncomment/add:
-Color
-VerbosePkgLists
-ParallelDownloads = 10
-ILoveCandy        
-
-# Enable multilib (required for Steam/Wine 32-bit):
-# Uncomment [multilib] section:
-[multilib]
-Include = /etc/pacman.d/mirrorlist
-```
-
----
-
-##  Reflector — Auto Mirror Updates
-```bash
-sudo pacman -S reflector
-
-sudo cat > /etc/xdg/reflector/reflector.conf << 'EOF'
---protocol https
---age 12
---latest 10
---sort age
---save /etc/pacman.d/mirrorlist
-EOF
-
-sudo systemctl enable --now reflector.timer
-sudo systemctl enable --now reflector.service
 ```
 
 ---
