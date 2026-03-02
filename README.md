@@ -645,6 +645,8 @@ chsh -s /bin/zsh
 # Install OhMyZsh
 # https://github.com/ohmyzsh/ohmyzsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# OR AUR:
+# paru -S oh-my-zsh-git
 
 # Install plugins zsh-autosuggestions zsh-syntax-highlighting
 pacman -S zsh-autosuggestions zsh-syntax-highlighting
