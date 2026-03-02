@@ -590,8 +590,6 @@ vim /etc/systemd/zram-generator.conf
 zram-size = ram / 2         # 16 GB zram from 32 GB RAM
 compression-algorithm = zstd
 swap-priority = 100
-mount-point = /dev/zram0
-fs-type = swap
 
 # Tune swappiness (lower = use RAM more aggressively)
 vim /etc/sysctl.d/99-swap.conf
