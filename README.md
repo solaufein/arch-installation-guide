@@ -496,6 +496,7 @@ EOF
 ```bash
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
 pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
+pacman -S papirus-icon-theme
 
 # systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
@@ -1001,6 +1002,9 @@ sudo pacman -Rns $(pacman -Qtdq)
 # Cleanup pacman cache (required package: pacman-contrib)
 sudo paccache -r
 
+---
+# Backups
+
 # View snapshots
 sudo snapper -c root list
 
@@ -1010,4 +1014,22 @@ sudo snapper -c root create -d "Before my experiment" --type single
 # Rollback if something breaks
 sudo snapper -c root rollback 5   # Rollback to snapshot #5
 reboot
+
+---
+# Logs and Errors
+
+# Check failed services
+systemctl --failed
+
+# Check for logs from last boot
+journalctl -b
+
+# Problems from last boot
+journalctl -p 3 -xb
+
+# Kernel problems
+journalctl -k
+
+sudo dmesg -T --level=err,warn
+
 ```
