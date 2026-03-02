@@ -662,6 +662,7 @@ plugins=(
 # https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#arch-linux
 paru -S --noconfirm zsh-theme-powerlevel10k-git
 echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+disable ZSH_THEME in .zshrc
 # OR Manually:
 # git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 # vim .zshrc
