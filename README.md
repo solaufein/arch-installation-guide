@@ -826,6 +826,7 @@ sudo pacman -S \
   fastfetch \          
   bat eza fd ripgrep \ 
   p7zip unrar unzip \  
+  usbutils \
   print-manager system-config-printer \
   cups \              
   cups-pdf \
@@ -862,8 +863,13 @@ sudo pacman -S \
   
 paru -S brave-bin visual-studio-code-bin
 
-## Printer Driver - Brother
+## Printer - Brother
+# Driver:
 paru -S brother-hl1210w
+
+# KDE -> System Settings -> Printers -> Add New...
+# Connection:
+lpd://192.168.2.140/
 ```
 
 ---
