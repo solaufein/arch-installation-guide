@@ -571,13 +571,13 @@ https://wiki.archlinux.org/title/Zsh
 sudo pacman -S zsh
 chsh -s /bin/zsh
 
-# OhMyZsh
+# Install OhMyZsh
 # https://github.com/ohmyzsh/ohmyzsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Plugins zsh-autosuggestions zsh-syntax-highlighting
+# Install plugins zsh-autosuggestions zsh-syntax-highlighting
 pacman -S zsh-autosuggestions zsh-syntax-highlighting
-# OR:
+# OR Manually:
 # git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 # git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
@@ -589,19 +589,34 @@ plugins=(
   zsh-syntax-highlighting
 )
 
-# Powerlevel10k
+# Install Powerlevel10k
 # https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#arch-linux
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+paru -S --noconfirm zsh-theme-powerlevel10k-git
+echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+# OR Manually:
+# git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+# vim .zshrc
+# ZSH_THEME="powerlevel10k/powerlevel10k"
 
-vim .zshrc
-ZSH_THEME="powerlevel10k/powerlevel10k"
-
-# Install MesloLGS font:
+# Install MesloLGS font for p10k
 # https://www.nerdfonts.com/font-downloads
-sudo pacman -S ttf-meslo-nerd
+pacman -S ttf-meslo-nerd
 fc-cache -fv
 
+# Configure p10k
 p10k configure
+
+# Configure Konsole:
+> Konsole → Settings → Edit Current Profile → Appearance
+> Select Font: MesloLGS NF Regular
+> Select Font size
+
+> General → Enable "Allow bold text"
+> Scrolling → Unlimited scrollback
+
+> Settings → Configure Konsole → General
+> Select: Remember window size
+> Select: Use system monospace font (optional)
 ```
 
 ---
