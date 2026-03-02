@@ -826,6 +826,7 @@ sudo pacman -S \
   fastfetch \          
   bat eza fd ripgrep \ 
   p7zip unrar unzip \  
+  print-manager system-config-printer \
   cups \              
   cups-pdf \
   cups-filters \
