@@ -166,9 +166,9 @@ pacstrap -K /mnt \
   vim nano git \
   sudo \
   zstd
-```
 
-> `amd-ucode` — CPU microcode for Ryzen 7800X3D (AMD)
+# `amd-ucode` — CPU microcode for Ryzen 7800X3D (AMD)
+```
 
 ---
 
@@ -177,7 +177,9 @@ pacstrap -K /mnt \
 ### Generate fstab
 ```bash
 genfstab -U /mnt >> /mnt/etc/fstab
-cat /mnt/etc/fstab  # Verify — should show all 7 subvolumes + EFI
+
+# Verify — should show all 7 subvolumes + EFI
+cat /mnt/etc/fstab
 ```
 
 ### Chroot into the new system
@@ -204,11 +206,10 @@ KEYMAP=pl2
 ```bash
 echo "archbox" > /etc/hostname
 
-cat > /etc/hosts << EOF
+vim /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   archbox.localdomain archbox
-EOF
 ```
 
 ### Root password
@@ -218,11 +219,7 @@ passwd
 
 ---
 
-##  Bootloader — Limine (for Dual Boot with Windows)
-
-Limine is a modern, fast, and simple BIOS/UEFI bootloader.
-
-### Install Limine
+##  Bootloader — Limine (Dual Boot with Windows)
 ```bash
 pacman -S limine efibootmgr
 
@@ -242,7 +239,7 @@ efibootmgr --create \
 ```
 
 ### Create Limine config
-## Get UUIDs
+### Get UUIDs
 ```bash
 ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
 
@@ -268,19 +265,19 @@ comment: machine-id=PLACEHOLDER_MACHINE
     //linux
         protocol: linux
         path: boot():/vmlinuz-linux
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet nowatchdog splash
         module_path: boot():/initramfs-linux.img
     
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet nowatchdog splash
         module_path: boot():/initramfs-linux-lts.img
     
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet splash
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw quiet nowatchdog splash
         module_path: boot():/initramfs-linux-zen.img
     
         //Snapshots
@@ -291,7 +288,7 @@ comment: machine-id=PLACEHOLDER_MACHINE
         path: uuid(PLACEHOLDER_WINDOWS):/EFI/Microsoft/Boot/bootmgfw.efi
 EOF
 
-# Replace UUID placeholder with actual UUID
+# Replace UUID placeholders with actual UUID
 sed -i "s/PLACEHOLDER_ROOT/${ROOT_UUID}/g" /boot/limine.conf
 sed -i "s/PLACEHOLDER_MACHINE/${MACHINE_UUID}/g" /boot/limine.conf
 sed -i "s/PLACEHOLDER_WINDOWS/${WINDOWS_UUID}/g" /boot/limine.conf
@@ -300,7 +297,6 @@ sed -i "s/PLACEHOLDER_WINDOWS/${WINDOWS_UUID}/g" /boot/limine.conf
 ---
 
 ##  mkinitcpio — initramfs
-
 Creating initramfs is usually not required because mkinitcpio was run on installation kernel package with the pacstrap
 
 ```bash
@@ -310,7 +306,6 @@ mkinitcpio -P
 ---
 
 ##  User Setup
-
 ```bash
 useradd -m -G wheel,audio,video,storage,optical,games,network -s /bin/bash yourusername
 passwd yourusername
@@ -323,7 +318,6 @@ EDITOR=vim visudo
 ---
 
 ##  Audio (PipeWire)
-
 ```bash
 pacman -S \
   pipewire pipewire-alsa pipewire-pulse pipewire-jack \
@@ -337,7 +331,6 @@ pacman -S \
 ---
 
 ##  Networking
-
 ```bash
 pacman -S \
   networkmanager \
@@ -359,7 +352,6 @@ EOF
 ---
 
 ##  Bluetooth
-
 ```bash
 pacman -S bluez bluez-utils blueman
 systemctl enable bluetooth
@@ -370,7 +362,6 @@ systemctl enable bluetooth
 ##  Essential Services Verification
 ```bash
 systemctl enable NetworkManager
-systemctl enable fstrim.timer          # SSD TRIM (weekly)
 systemctl enable bluetooth
 systemctl enable bluetooth.service   
 ```
@@ -389,10 +380,6 @@ umount -R /mnt
 reboot
 ```
 
----
-
----
-
 #
 ###########################################################################
 ###########################################################################
@@ -402,7 +389,6 @@ reboot
 #
 
 ##  First Boot & AUR Helper (paru)
-
 ```bash
 # Login as your user, then:
 sudo pacman -Syu
@@ -417,11 +403,10 @@ makepkg -si
 ---
 
 ##  Firewall (UFW)
+https://wiki.archlinux.org/title/Uncomplicated_Firewall
 
 ```bash
 pacman -S ufw
-
-systemctl enable ufw
 
 # Default policies
 ufw default deny incoming
@@ -435,29 +420,32 @@ ufw allow 5353/udp   # mDNS
 # Enable
 ufw enable
 ufw status verbose
+
+# Start and enable "ufw.service" to make it available at boot. 
+# Note that this will not work if "iptables.service" is also enabled
+systemctl enable --now ufw
 ```
 
 ---
 
 ##  ZRAM Swap
+https://wiki.archlinux.org/title/Zram#Using_zram-generator
 
 ```bash
 pacman -S zram-generator
 
-cat > /etc/systemd/zram-generator.conf << 'EOF'
+vim /etc/systemd/zram-generator.conf
 [zram0]
 zram-size = ram / 2         # 16 GB zram from 32 GB RAM
 compression-algorithm = zstd
 swap-priority = 100
 mount-point = /dev/zram0
 fs-type = swap
-EOF
 
 # Tune swappiness (lower = use RAM more aggressively)
-cat > /etc/sysctl.d/99-swap.conf << 'EOF'
+vim /etc/sysctl.d/99-swap.conf
 vm.swappiness = 10
 vm.vfs_cache_pressure = 50
-EOF
 
 # Zram enable
 sudo systemctl daemon-reload
@@ -473,6 +461,7 @@ zramctl
 ---
 
 ##  NVIDIA Driver Setup
+https://wiki.archlinux.org/title/NVIDIA
 
 ```bash
 # Find GPU Family name
@@ -480,41 +469,38 @@ lspci -k -d ::03xx
 
 # Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
 pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
-
-# Optional:
-# pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
+pacman -S sudo pacman -S nvidia-vaapi-driver libva-utils
+pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
 
 # Prevent nouveau from loading
-cat > /etc/modprobe.d/blacklist-nouveau.conf << 'EOF'
+vim /etc/modprobe.d/blacklist-nouveau.conf
 blacklist nouveau
 options nouveau modeset=0
-EOF
 
 # NVIDIA DRM modesetting (required for Wayland)
-cat > /etc/modprobe.d/nvidia.conf << 'EOF'
+vim /etc/modprobe.d/nvidia.conf
 options nvidia_drm modeset=1 fbdev=1
 options nvidia NVreg_UsePageAttributeTable=1
 options nvidia NVreg_PreserveVideoMemoryAllocations=1
 options nvidia NVreg_EnableGpuFirmware=0
-EOF
 
 # Enable NVIDIA services for suspend/resume
 systemctl enable nvidia-suspend.service
 systemctl enable nvidia-hibernate.service
 systemctl enable nvidia-resume.service
 
+# Verify modeset
 cat /sys/module/nvidia_drm/parameters/modeset   # should be Y
 ```
 
 ---
 
 ##  NVIDIA Fine-Tuning (Wayland)
-
 ```bash
 # Environment variables for Wayland NVIDIA
 mkdir -p ~/.config/plasma-workspace/env
 
-cat > ~/.config/plasma-workspace/env/nvidia-wayland.sh << 'EOF'
+vim ~/.config/plasma-workspace/env/nvidia-wayland.sh
 export LIBVA_DRIVER_NAME=nvidia
 export GBM_BACKEND=nvidia-drm
 export __GLX_VENDOR_LIBRARY_NAME=nvidia
@@ -526,14 +512,19 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 # VRR / GSYNC support
 export __GL_GSYNC_ALLOWED=1
 export __GL_VRR_ALLOWED=1
-EOF
+export __NV_PRIME_RENDER_OFFLOAD=1
+
+# Hardware Acceleration (install nvidia-vaapi-driver!)
+export NVD_BACKEND=direct
 
 chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 ```
 
 ---
 
-## NVIDIA Pacman hook — rebuild NVIDIA on kernel update
+## NVIDIA mkinitcpio pacman hook
+Update NVIDIA module in initcpio after NVIDIA or kernel update
+
 ```bash
 mkdir -p /etc/pacman.d/hooks
 
@@ -560,40 +551,84 @@ EOF
 ---
 
 ##  KDE Plasma (Wayland)
-
 ```bash
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
+pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
 
-#  plasma-wayland-session \
-#  xorg-xwayland \
-#  xdg-desktop-portal-kde \
-#  qt6-wayland \
-#  qt5-wayland
-
-# Optional: plasma-mobile (it install slowly)
-# paru -S plasma-mobile
-
-#systemctl enable plasma-login-manager
+# systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
 systemctl disable sddm.service
 
-> Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline
+# Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline
 
 reboot
+```
+
+## ZSH SHELL
+https://wiki.archlinux.org/title/Zsh
+
+```bash
+sudo pacman -S zsh
+chsh -s /bin/zsh
+
+# OhMyZsh
+# https://github.com/ohmyzsh/ohmyzsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Plugins zsh-autosuggestions zsh-syntax-highlighting
+pacman -S zsh-autosuggestions zsh-syntax-highlighting
+# OR:
+# git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+# git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+vim .zshrc
+plugins=(
+  git
+  sudo
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+# Powerlevel10k
+# https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#arch-linux
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+vim .zshrc
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Install MesloLGS font:
+# https://www.nerdfonts.com/font-downloads
+sudo pacman -S ttf-meslo-nerd
+fc-cache -fv
+
+p10k configure
+```
+
+---
+
+##  TRIM Support (SSD Optimization)
+```bash
+# Verify TRIM is supported
+sudo hdparm -I /dev/sda | grep -i trim
+
+# fstrim timer
+sudo systemctl enable fstrim.timer          # SSD TRIM (weekly)
+sudo systemctl status fstrim.timer
+
+# Verify discard=async is in fstab (it should be from our mount options)
+grep discard /etc/fstab
 ```
 
 ---
 
 ##  Snapper — Btrfs Snapshots with Pre/Post System Updates
-
 https://wiki.archlinux.org/title/Snapper#Creating_a_new_configuration
 
-### Install snapper and snap-pac
+### Install snapper and snap-pac and btrfs-assistant
 ```bash
-sudo pacman -S snapper snap-pac 
-sudo pacman -S btrfs-assistant      # GUI for snapper
-
-# snap-pac` automatically creates **pre** and **post** snapshots around every `pacman` transaction.
+sudo pacman -S snapper
+sudo pacman -S snap-pac     # automatically creates **pre** and **post** snapshots around every `pacman` transaction
+sudo pacman -S btrfs-assistant    # GUI for snapper
 ```
 
 ### Configure snapper for root
@@ -609,44 +644,37 @@ rm -r /.snapshots
 sudo snapper -c root create-config /
 btrfs subvolume delete /.snapshots
 mkdir /.snapshots
-mount -a      # mount -a will use /etc/fstab configuration to mount again /.snapshots subvolume
+mount -a      # this will use /etc/fstab configuration to mount again /.snapshots subvolume
 
 # Verify
 sudo snapper -c root list
 sudo cat /etc/snapper/configs/root
-
-todo
 ```
 
 ### Tune snapper cleanup policy
 ```bash
 sudo vim /etc/snapper/configs/root
-
 # Set these values:
 TIMELINE_CREATE="no"          # We don't need timeline — snap-pac handles it
 NUMBER_CLEANUP="yes"
 NUMBER_MIN_AGE="1800"
 NUMBER_LIMIT="10"             # Keep last 10 pre/post pairs
 NUMBER_LIMIT_IMPORTANT="10"
-```
 
-### Enable snapper services
-```bash
 sudo systemctl enable --now snapper-cleanup.timer
-#sudo systemctl enable --now snapper-timeline.timer  # Optional if timeline disabled
-```
 
-### Allow user access to snapshots
-```bash
+# Optional if timeline disabled:
+# sudo systemctl enable --now snapper-timeline.timer 
+
+# Allow user access to snapshots:
 sudo snapper -c root set-config ALLOW_USERS=$(whoami)
 sudo chmod a+rx /.snapshots
 ```
 
 ---
 
-##  Limine Snapper Sync - boot entries for each snapshot
-
-For Limine, we use **limine-snapper-sync** (AUR) which generates boot entries for each snapshot:
+##  Limine Snapper Sync
+Generates boot entries for each snapshot:
 https://wiki.archlinux.org/title/Limine#Snapper_snapshot_integration_for_Btrfs
 
 ```bash
@@ -659,47 +687,37 @@ sudo systemctl enable --now limine-snapper-sync.service
 # Verify and trigger to check if it works
 sudo limine-snapper-sync
 
+# After this, every snapper snapshot will get its own entry in the Limine boot menu.
 ```
-
-> After this, every snapper snapshot will get its own entry in the Limine boot menu.
-> To **rollback**: boot the snapshot, verify it works, then make it the new default subvolume:
-> ```bash
-> sudo snapper -c root list
-> sudo snapper -c root rollback <snapshot_number>
-> reboot
-> ```
 
 ---
 
 ## Create Hook limine-mkinitcpio-hook:
-
 Automatically update kernel boot entries in /boot/limine.conf whenever kernels are installed, updated, or removed
 
 ```bash
 paru -S limine-mkinitcpio-hook
-```
 
-> Commands:
-> - limine-install installs Limine to your EFI system partition.
-> - limine-install --fallback installs Limine as the default fallback boot loader.
-> - limine-update updates Limine and generates an initramfs or UKI depending on your initramfs generator:
-> - - For mkinitcpio: run limine-mkinitcpio instead of mkinitcpio
-> - limine-scan detects active EFI boot entries (dual boot) and allows you to easily add them to Limine.
-> - limine-entry-tool --remove-os "Windows Boot Manager" removes an OS entry matching the specified name, leaving its bootable files intact.
+# Commands:
+# - limine-install installs Limine to your EFI system partition.
+# - limine-install --fallback installs Limine as the default fallback boot loader.
+# - limine-update updates Limine and generates an initramfs or UKI depending on your initramfs generator:
+# - - For mkinitcpio: run limine-mkinitcpio instead of mkinitcpio
+# - limine-scan detects active EFI boot entries (dual boot) and allows you to easily add them to Limine.
+# - limine-entry-tool --remove-os "Windows Boot Manager" removes an OS entry matching the specified name, leaving its bootable files intact.
 
-
-> Some non-compliant UEFI motherboards (e.g., certain MSI boards) have non-standard or broken EFI implementations. They may not work with efibootmgr or kernel-based UEFI detection. To skip UEFI detection and registration and set Limine as the fallback boot loader at the standard EFI path /boot/EFI/BOOT/BOOTX64.EFI, run:
-```bash
+# Some non-compliant UEFI motherboards (e.g., certain MSI boards) have non-standard or broken EFI implementations. They may not work with efibootmgr or kernel-based UEFI detection. To skip UEFI detection and registration and set Limine as the fallback boot loader at the standard EFI path /boot/EFI/BOOT/BOOTX64.EFI, run:
 # limine-install --skip-uefi --fallback
+
+# **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
 ```
-
-> **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
-
 ---
 
 ## Create Limine Hook:
-/etc/pacman.d/hooks/99-limine.hook
+Update Limine EFI after limine upgrade
+
 ```bash
+vim /etc/pacman.d/hooks/99-limine.hook
 [Trigger]
 Operation = Install
 Operation = Upgrade
@@ -714,34 +732,17 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 ---
 
-##  TRIM Support (SSD Optimization)
+##  mkinitcpio initramfs HOOKS/MODULES configuration
+Configure HOOKS for Btrfs, NVIDIA, and encryption support.
 
 ```bash
-# Verify TRIM is supported
-sudo hdparm -I /dev/sda | grep -i trim
-
-# fstrim timer (already enabled — runs weekly)
-sudo systemctl status fstrim.timer
-
-# Verify discard=async is in fstab (it should be from our mount options)
-grep discard /etc/fstab
-```
-
----
-
-##  mkinitcpio initramfs Hooks configuration
-
-Configure hooks for Btrfs, NVIDIA, and encryption support.
-
-```bash
-cat > /etc/mkinitcpio.conf << 'EOF'
+vim /etc/mkinitcpio.conf
 MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
 HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
-EOF
 
 mkinitcpio -P
 
@@ -753,8 +754,7 @@ reboot
 
 ---
 
-## Verify microcode
-
+## Verify microcode (amd_ucode)
   https://wiki.archlinux.org/title/Microcode#mkinitcpio
   https://wiki.archlinux.org/title/Microcode#Limine
 
@@ -768,34 +768,14 @@ lsinitcpio --early /boot/initramfs-linux.img | grep microcode
 
 ---
 
-##  Optional: AMD CPU Tuning (Ryzen 7800X3D)
-
-https://wiki.archlinux.org/title/KDE#Power_management
-
-```bash
-# Install CPU power management
-sudo pacman -S power-profiles-daemon powerdevil
-
-# Limit peak power slightly (optional — 7800X3D runs hot under load)
-# Ryzen power plans via KDE Power Management (power-profiles-daemon)
-sudo systemctl enable --now power-profiles-daemon
-
-# Install CoreCtrl for fine-grained AMD control (AUR)
-paru -S corectrl
-```
-
----
-
 ##  Pacman Configuration
-
 ```bash
 sudo vim /etc/pacman.conf
-
 # Uncomment/add:
 Color
 VerbosePkgLists
 ParallelDownloads = 10
-ILoveCandy        # Fun progress bar
+ILoveCandy        
 
 # Enable multilib (required for Steam/Wine 32-bit):
 # Uncomment [multilib] section:
@@ -806,7 +786,6 @@ Include = /etc/pacman.d/mirrorlist
 ---
 
 ##  Reflector — Auto Mirror Updates
-
 ```bash
 sudo pacman -S reflector
 
@@ -825,7 +804,6 @@ sudo systemctl enable --now reflector.service
 ---
 
 ##  Useful Tools
-
 ```bash
 sudo pacman -S \
   zsh \
@@ -846,11 +824,17 @@ sudo pacman -S \
   spectacle \
   libreoffice-fresh \
   gimp \
-  qbittorrent \
+  qbittorrent
+
+sudo pacman -S \
   kde-gtk-config \    
   gtk3 gtk4 \
   xdg-utils \
   xdg-user-dirs \
+reboot
+xdg-user-dirs-update
+
+sudo pacman -S \
   jdk21-openjdk \
   nodejs \
   npm \
@@ -864,22 +848,15 @@ sudo pacman -S \
   podman-compose \
   podman-docker
   
-  
 paru -S brave-bin visual-studio-code-bin
-```
 
----
-
-## Printer Driver -Brother
-
-```bash
+## Printer Driver - Brother
 paru -S brother-hl1210w
 ```
 
 ---
 
 ##  Gaming Stack
-
 ```bash
 pacman -S \
   steam \
@@ -893,46 +870,60 @@ pacman -S \
   gamescope \          # Wayland gaming compositor (Valve)
   mangohud \           # Performance overlay
   lib32-mangohud \
-  vulkan-radeon \      # Keep for compatibility
-  lib32-vulkan-radeon \
-  mesa \
-  lib32-mesa \
-  vulkan-tools
+  vulkan-tools \
+  nvtop                # GPU monitoring
 
 # Enable GameMode daemon
 systemctl --user enable gamemoded   # Run after first login
-```
 
-> In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
-> For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
+# In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
+# For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
+```
 
 ---
 
-##  Flatpak
+##  Optional: AMD CPU Tuning (Ryzen 7800X3D)
+https://wiki.archlinux.org/title/KDE#Power_management
 
+```bash
+# Install CPU power management
+sudo pacman -S power-profiles-daemon powerdevil
+
+# Limit peak power slightly (optional — 7800X3D runs hot under load)
+# Ryzen power plans via KDE Power Management (power-profiles-daemon)
+sudo systemctl enable --now power-profiles-daemon
+
+# Install CoreCtrl for fine-grained AMD control (AUR)
+paru -S corectrl
+```
+
+---
+
+##  Optional: Flatpak
 ```bash
 sudo pacman -S flatpak
 # Flatpak remote
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-```
-
----
-
-##  KDE Plasma Wayland — Final Tweaks
-
-```bash
-# Install KDE Discover backend for firmware updates
-sudo pacman -S discover packagekit-qt6 fwupd
-
-# Flatpak integration in Discover
+# Flatpak integration
 sudo pacman -S flatpak-kcm
 ```
 
 ---
 
-##  Security Hardening
+##  Optional: Firmware updates tool
+```bash
+# Install firmware updates tool:
+sudo pacman -S fwupd
+reboot
+# Commands after: 
+# fwupdmgr get-devices, 
+# fwupdmgr get-updates
+```
 
+---
+
+##  Optional: Security Hardening
 ```bash
 # Kernel hardening sysctl
 sudo cat > /etc/sysctl.d/99-security.conf << 'EOF'
@@ -967,8 +958,7 @@ sudo sysctl --system
 
 ---
 
-##  System Update Workflow (with Snapshots)
-
+##  System Update Workflow
 With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
 
 ```bash
@@ -977,6 +967,12 @@ sudo pacman -Syu
 
 # Or with paru (also covers AUR)
 paru -Syu
+
+# Remove package, not used dependencies and config files
+sudo pacman -Rns xxx
+
+# Cleanup orphaned packages after removal
+sudo pacman -Qtdq | sudo pacman -Rns -
 
 # View snapshots
 sudo snapper -c root list
