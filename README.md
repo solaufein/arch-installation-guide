@@ -1,6 +1,7 @@
 # Arch Linux Installation Guide
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
 **Target disk:** `/dev/sda` | **Kernels:** linux, linux-lts, linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
+**Features:** btrfs, zram, snapper, snap-pac, ufw
 
 ---
 
@@ -252,8 +253,8 @@ WINDOWS_UUID=$(sudo blkid -s PARTUUID -o value /dev/nvme0n1p1)
 ```
 
 ```bash
-cat > /boot/limine.conf << 'EOF'
-# Limine Configuration
+vim /boot/limine.conf
+
 timeout: 5
 default_entry: 2
 remember_last_entry: yes
@@ -286,7 +287,7 @@ comment: machine-id=PLACEHOLDER_MACHINE
     //Windows
         protocol: efi
         path: uuid(PLACEHOLDER_WINDOWS):/EFI/Microsoft/Boot/bootmgfw.efi
-EOF
+
 
 # Replace UUID placeholders with actual UUID
 sed -i "s/PLACEHOLDER_ROOT/${ROOT_UUID}/g" /boot/limine.conf
@@ -319,11 +320,7 @@ EDITOR=vim visudo
 
 ##  Audio (PipeWire)
 ```bash
-pacman -S \
-  pipewire pipewire-alsa pipewire-pulse pipewire-jack \
-  wireplumber \
-  pavucontrol \
-  playerctl
+pacman -S pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl
 
 # Services are user-level — they start automatically after first login.
 ```
@@ -343,10 +340,9 @@ pacman -S \
 systemctl enable avahi-daemon
 
 # Set iwd as Wi-Fi backend for NetworkManager
-cat > /etc/NetworkManager/conf.d/wifi-backend.conf << 'EOF'
+vim /etc/NetworkManager/conf.d/wifi-backend.conf
 [device]
 wifi.backend=iwd
-EOF
 ```
 
 ---
@@ -394,7 +390,7 @@ reboot
 sudo pacman -Syu
 
 # Install paru
-sudo pacman -S --needed git base-devel
+pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/paru.git /tmp/paru
 cd /tmp/paru
 makepkg -si
@@ -470,7 +466,7 @@ Update NVIDIA module in initcpio after NVIDIA or kernel update
 ```bash
 mkdir -p /etc/pacman.d/hooks
 
-cat > /etc/pacman.d/hooks/nvidia.hook << 'EOF'
+vim /etc/pacman.d/hooks/nvidia.hook
 [Trigger]
 Operation=Install
 Operation=Upgrade
@@ -487,7 +483,6 @@ Depends=mkinitcpio
 When=PostTransaction
 NeedsTargets
 Exec=/usr/bin/limine-mkinitcpio'
-EOF
 ```
 
 ---
@@ -510,7 +505,7 @@ reboot
 ---
 
 ##  mkinitcpio initramfs HOOKS/MODULES configuration
-Configure HOOKS for Btrfs, NVIDIA, and encryption support.
+Configure HOOKS for Btrfs, NVIDIA, and encryption support
 
 ```bash
 vim /etc/mkinitcpio.conf
@@ -538,7 +533,7 @@ reboot
 ```bash
 lsinitcpio --early /boot/initramfs-linux.img | grep microcode 
 
-# Should print:
+# It should print:
 #kernel/x86/microcode/
 #kernel/x86/microcode/AuthenticAMD.bin
 ```
@@ -547,12 +542,11 @@ lsinitcpio --early /boot/initramfs-linux.img | grep microcode
 
 ##  Pacman Configuration
 ```bash
-sudo vim /etc/pacman.conf
-# Uncomment/add:
+vim /etc/pacman.conf
 Color
 VerbosePkgLists
 ParallelDownloads = 10
-ILoveCandy        
+ILoveCandy
 
 # Enable multilib (required for Steam/Wine 32-bit):
 # Uncomment [multilib] section:
@@ -564,15 +558,14 @@ Include = /etc/pacman.d/mirrorlist
 
 ##  Reflector — Auto Mirror Updates
 ```bash
-sudo pacman -S reflector
+pacman -S reflector
 
-sudo cat > /etc/xdg/reflector/reflector.conf << 'EOF'
+vim /etc/xdg/reflector/reflector.conf
 --protocol https
 --age 12
 --latest 10
 --sort age
 --save /etc/pacman.d/mirrorlist
-EOF
 
 sudo systemctl enable --now reflector.timer
 sudo systemctl enable --now reflector.service
@@ -640,7 +633,7 @@ systemctl enable --now ufw
 https://wiki.archlinux.org/title/Zsh
 
 ```bash
-sudo pacman -S zsh
+pacman -S zsh
 chsh -s /bin/zsh
 
 # Install OhMyZsh
@@ -712,9 +705,9 @@ https://wiki.archlinux.org/title/Snapper#Creating_a_new_configuration
 
 ### Install snapper and snap-pac and btrfs-assistant
 ```bash
-sudo pacman -S snapper
-sudo pacman -S snap-pac     # automatically creates **pre** and **post** snapshots around every `pacman` transaction
-sudo pacman -S btrfs-assistant    # GUI for snapper
+pacman -S snapper
+pacman -S snap-pac     # automatically creates **pre** and **post** snapshots around every `pacman` transaction
+pacman -S btrfs-assistant    # GUI for snapper
 ```
 
 ### Configure snapper for root
@@ -820,19 +813,20 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 ##  Useful Tools
 ```bash
-sudo pacman -S \
+pacman -S \
   zsh \
-  btop \              
-  fastfetch \          
-  bat eza fd ripgrep \ 
-  p7zip unrar unzip \  
+  btop \
+  fastfetch \
+  bat eza fd ripgrep \
+  p7zip unrar unzip \
   usbutils \
-  print-manager system-config-printer \
-  cups \              
+  print-manager \
+  system-config-printer \
+  cups \
   cups-pdf \
   cups-filters \
-  vlc \               
-  firefox \            
+  vlc \
+  firefox \
   dolphin \
   kate \
   ark \
@@ -843,11 +837,11 @@ sudo pacman -S \
   gimp \
   qbittorrent
 
-sudo pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
+pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 reboot
-xdg-user-dirs-update
+xdg-user-dirs-update    # Create user dirs like Home, Documents etc
 
-sudo pacman -S \
+pacman -S \
   jdk21-openjdk \
   nodejs \
   npm \
@@ -905,7 +899,7 @@ https://wiki.archlinux.org/title/KDE#Power_management
 
 ```bash
 # Install CPU power management
-sudo pacman -S power-profiles-daemon powerdevil
+pacman -S power-profiles-daemon powerdevil
 
 # Limit peak power slightly (optional — 7800X3D runs hot under load)
 # Ryzen power plans via KDE Power Management (power-profiles-daemon)
@@ -919,12 +913,12 @@ paru -S corectrl
 
 ##  Optional: Flatpak
 ```bash
-sudo pacman -S flatpak
+pacman -S flatpak
 # Flatpak remote
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 # Flatpak integration
-sudo pacman -S flatpak-kcm
+pacman -S flatpak-kcm
 ```
 
 ---
@@ -932,7 +926,7 @@ sudo pacman -S flatpak-kcm
 ##  Optional: Firmware updates tool
 ```bash
 # Install firmware updates tool:
-sudo pacman -S fwupd
+pacman -S fwupd
 reboot
 # Commands after: 
 # fwupdmgr get-devices, 
@@ -944,7 +938,7 @@ reboot
 ##  Optional: Security Hardening
 ```bash
 # Kernel hardening sysctl
-sudo cat > /etc/sysctl.d/99-security.conf << 'EOF'
+vim /etc/sysctl.d/99-security.conf
 # Disable IP forwarding
 net.ipv4.ip_forward = 0
 net.ipv6.conf.all.forwarding = 0
@@ -969,7 +963,7 @@ net.core.bpf_jit_harden = 2
 
 # Restrict dmesg to root
 kernel.dmesg_restrict = 1
-EOF
+
 
 sudo sysctl --system
 ```
