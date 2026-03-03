@@ -857,6 +857,11 @@ pacman -S \
   
 paru -S brave-bin visual-studio-code-bin
 
+## Sublime text
+curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
+echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" | sudo tee -a /etc/pacman.conf
+sudo pacman -Syu sublime-text
+
 ## Printer - Brother
 # Driver:
 paru -S brother-hl1210w
@@ -974,6 +979,11 @@ sudo sysctl --system
 With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
 
 ```bash
+---
+##################################
+# Maintenance
+##################################
+
 # Full system update (snapshots happen automatically)
 sudo pacman -Syu
 
@@ -1004,7 +1014,22 @@ sudo pacman -Rns $(pacman -Qtdq)
 sudo paccache -r
 
 ---
+##################################
+# Packages
+##################################
+
+# Export packages to txt
+pacman -Qqen > pkglist-official.txt
+pacman -Qqem > pkglist-aur.txt
+
+# Import packages from txt
+sudo pacman -S --needed - < pkglist-official.txt
+paru -S --needed - < pkglist-aur.txt
+
+---
+##################################
 # Backups
+##################################
 
 # View snapshots
 sudo snapper -c root list
@@ -1017,13 +1042,23 @@ sudo snapper -c root rollback 5   # Rollback to snapshot #5
 reboot
 
 ---
+##################################
 # Logs and Errors
+##################################
+
+# Check Ethernet info
+lspci -k | grep -A 3 Ethernet
+inxi -N
+ip link
+ip link show enp11s0
 
 # Check failed services
 systemctl --failed
 
 # Check for logs from last boot
 journalctl -b
+journalctl -b -p err
+journalctl -b -1
 
 # Problems from last boot
 journalctl -p 3 -xb
@@ -1032,5 +1067,7 @@ journalctl -p 3 -xb
 journalctl -k
 
 sudo dmesg -T --level=err,warn
+sudo dmesg | less
+
 
 ```
