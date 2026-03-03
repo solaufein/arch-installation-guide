@@ -1,4 +1,4 @@
-# Arch Linux Installation Guide
+# Arch Linux Installation Guide 2026
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
 **Target disk:** `/dev/sda` | **Kernels:** linux, linux-lts, linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
 **Features:** btrfs, zram, snapper, snap-pac, ufw
