@@ -492,7 +492,9 @@ Exec=/usr/bin/limine-mkinitcpio'
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
 pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
 pacman -S papirus-icon-theme
-sudo localectl set-x11-keymap pl
+
+localectl status
+# Should be KEYMAP=pl, if not then run: "sudo localectl set-keymap pl"
 
 # systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
