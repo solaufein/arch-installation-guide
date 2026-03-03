@@ -25,7 +25,7 @@
 
 ### Set keyboard layout and font
 ```bash
-loadkeys pl2
+loadkeys pl
 setfont Lat2-Terminus16
 ```
 
@@ -154,7 +154,7 @@ sudo reflector --protocol https \
 ### Install base system
 ```bash
 vim /mnt/etc/vconsole.conf      # We need it before because pacstrap can raise some errors about missing vconsole
-KEYMAP=pl2
+KEYMAP=pl
 
 pacstrap -K /mnt \
   base base-devel linux linux-headers linux-firmware \
@@ -200,7 +200,7 @@ locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 vim /etc/vconsole.conf
-KEYMAP=pl2
+KEYMAP=pl
 ```
 
 ### Hostname
@@ -492,6 +492,7 @@ Exec=/usr/bin/limine-mkinitcpio'
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
 pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
 pacman -S papirus-icon-theme
+sudo localectl set-x11-keymap pl
 
 # systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
