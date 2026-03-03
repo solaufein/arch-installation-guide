@@ -164,7 +164,7 @@ pacstrap -K /mnt \
   btrfs-progs \
   networkmanager \
   reflector \
-  vim nano git \
+  vim less nano git \
   sudo \
   zstd
 
@@ -838,7 +838,8 @@ pacman -S \
   spectacle \
   libreoffice-fresh \
   gimp \
-  qbittorrent
+  qbittorrent \
+  inxi
 
 pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 reboot
