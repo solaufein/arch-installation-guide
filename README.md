@@ -621,9 +621,9 @@ ufw default deny incoming
 ufw default allow outgoing
 
 # Allow common services
-ufw allow ssh
 ufw allow 1900/udp   # UPnP/SSDP (KDE Connect, etc.)
 ufw allow 5353/udp   # mDNS
+# ufw allow ssh
 
 # Enable
 ufw enable
