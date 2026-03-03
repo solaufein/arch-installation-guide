@@ -616,9 +616,18 @@ pacman -S ufw
 ufw default deny incoming
 ufw default allow outgoing
 
-# Allow common services
-ufw allow 1900/udp   # UPnP/SSDP (KDE Connect, etc.)
-ufw allow 5353/udp   # mDNS
+# Allow from local networks (vlans)
+sudo ufw allow from 192.168.1.0/24
+sudo ufw allow from 192.168.2.0/24
+sudo ufw allow from 192.168.99.0/24
+
+# Allow mDNS (Avahi/Bonjour)
+ufw allow from 192.168.0.0/16 to any port 5353 proto udp
+
+# Allow SSDP (UPnP/Device Discovery)
+ufw allow from 192.168.0.0/16 to any port 1900 proto udp
+
+# Optional ssh access
 # ufw allow ssh
 
 # Enable
