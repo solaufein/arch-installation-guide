@@ -345,14 +345,8 @@ vim /etc/NetworkManager/conf.d/wifi-backend.conf
 wifi.backend=iwd
 
 vim /etc/iwd/main.conf
-[General]
-EnableNetworkConfiguration=true
-
 [Regulatory]
 Country=PL
-
-# after reboot verify country: PL
-iw reg get
 
 systemctl enable NetworkManager
 ```
