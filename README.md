@@ -351,6 +351,8 @@ EnableNetworkConfiguration=true
 [Regulatory]
 Country=PL
 
+# after reboot verify country: PL
+iw reg get
 
 systemctl enable NetworkManager
 ```
