@@ -260,7 +260,6 @@ default_entry: 2
 remember_last_entry: yes
 
 /+Arch Linux
-comment: Any comment
 comment: machine-id=PLACEHOLDER_MACHINE
 
     //linux
