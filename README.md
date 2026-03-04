@@ -153,7 +153,7 @@ sudo reflector --protocol https \
 
 ### Install base system
 ```bash
-vim /mnt/etc/vconsole.conf      # We need it before because pacstrap can raise some errors about missing vconsole
+vim /mnt/etc/vconsole.conf      # We need KEYMAP before, because pacstrap can raise some errors about missing vconsole
 KEYMAP=pl
 
 pacstrap -K /mnt \
@@ -230,7 +230,7 @@ pacman -S limine efibootmgr
 mkdir -p /boot/EFI/limine
 cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
-# Register with UEFI
+# Register Limine with UEFI
 efibootmgr --create \
   --disk /dev/sda \
   --part 1 \
@@ -342,6 +342,8 @@ systemctl enable avahi-daemon
 vim /etc/NetworkManager/conf.d/wifi-backend.conf
 [device]
 wifi.backend=iwd
+
+systemctl enable NetworkManager
 ```
 
 ---
@@ -350,15 +352,6 @@ wifi.backend=iwd
 ```bash
 pacman -S bluez bluez-utils blueman
 systemctl enable bluetooth
-```
-
----
-
-##  Essential Services Verification
-```bash
-systemctl enable NetworkManager
-systemctl enable bluetooth
-systemctl enable bluetooth.service   
 ```
 
 ---
@@ -383,7 +376,9 @@ reboot
 ###########################################################################
 #
 
-##  First Boot & AUR Helper (paru)
+## First Boot
+
+## AUR Helper (paru)
 ```bash
 # Login as your user, then:
 sudo pacman -Syu
@@ -498,8 +493,6 @@ localectl status
 # systemctl enable plasma-login-manager
 systemctl enable plasmalogin.service
 systemctl disable sddm.service
-
-# Check if you have nvidia-drm.modeset=1 in cat /proc/cmdline
 
 reboot
 ```
