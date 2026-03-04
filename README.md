@@ -851,6 +851,8 @@ pacman -S \
   nodejs \
   npm \
   dbeaver \
+  jdk-openjdk \
+  gradle \
   pycharm-community-edition \
   idea-community-edition \
   python \
