@@ -334,6 +334,7 @@ pacman -S \
   nm-connection-editor \
   iwd \          # Modern Wi-Fi backend
   avahi \        # mDNS/zeroconf
+  wireless-regdb \
   nss-mdns
 
 systemctl enable avahi-daemon
@@ -342,6 +343,14 @@ systemctl enable avahi-daemon
 vim /etc/NetworkManager/conf.d/wifi-backend.conf
 [device]
 wifi.backend=iwd
+
+vim /etc/iwd/main.conf
+[General]
+EnableNetworkConfiguration=true
+
+[Regulatory]
+Country=PL
+
 
 systemctl enable NetworkManager
 ```
@@ -613,11 +622,13 @@ sudo ufw allow from 192.168.1.0/24
 sudo ufw allow from 192.168.2.0/24
 sudo ufw allow from 192.168.99.0/24
 
-# Allow mDNS (Avahi/Bonjour)
+# Allow mDNS (Avahi/Bonjour) IPv4 and IPv6 link-local (fe80::/10)
 ufw allow from 192.168.0.0/16 to any port 5353 proto udp
+ufw allow proto udp from fe80::/10 to any port 5353
 
-# Allow SSDP (UPnP/Device Discovery)
+# Allow SSDP (UPnP/Device Discovery) IPv4 and IPv6 link-local (fe80::/10)
 ufw allow from 192.168.0.0/16 to any port 1900 proto udp
+ufw allow proto udp from fe80::/10 to any port 1900
 
 # Optional ssh access
 # ufw allow ssh
@@ -1055,9 +1066,15 @@ reboot
 
 # Check Ethernet info
 lspci -k | grep -A 3 Ethernet
+lspci -k | grep -A 5 MEDIATEK
+lspci | grep -i network
 inxi -N
 ip link
 ip link show enp11s0
+mtr wp.pl
+
+# Check drivers USB
+lsusb
 
 # Check failed services
 systemctl --failed
