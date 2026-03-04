@@ -621,7 +621,7 @@ sudo ufw allow from 192.168.99.0/24
 # Allow mDNS (Avahi/Bonjour) IPv4 and IPv6 link-local (fe80::/10)
 ufw allow from 192.168.0.0/16 to any port 5353 proto udp
 ufw allow in on wlan0 proto udp from ff02::fb to any port 5353
-# Allow SSDP (UPnP/Device Discovery) IPv4 and IPv6 link-local (fe80::/10)
+# Allow SSDP (UPnP/Device Discovery) IPv4
 ufw allow from 192.168.0.0/16 to any port 1900 proto udp
 
 # Optional ssh access
