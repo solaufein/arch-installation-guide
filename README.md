@@ -587,7 +587,10 @@ swap-priority = 100
 
 # Tune swappiness (lower = use RAM more aggressively)
 vim /etc/sysctl.d/99-swap.conf
-vm.swappiness = 10
+vm.swappiness = 180
+vm.watermark_boost_factor = 0
+vm.watermark_scale_factor = 125
+vm.page-cluster = 0
 vm.vfs_cache_pressure = 50
 
 # Zram enable services
