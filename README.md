@@ -599,6 +599,8 @@ reboot
 
 # Verify zram
 zramctl
+# Verify zswap is disabled = N (zram and zswap should not run together)
+cat /sys/module/zswap/parameters/enabled
 ```
 
 ---
@@ -785,6 +787,12 @@ Automatically update kernel boot entries in /boot/limine.conf whenever kernels a
 
 ```bash
 paru -S limine-mkinitcpio-hook
+
+# Update /etc/kernel/cmdline (default cmdline for all kernels):
+# ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
+echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw quiet nowatchdog splash zswap.enabled=0" | sudo tee /etc/kernel/cmdline
+
+limine-mkinitcpio
 
 # Commands:
 # - limine-install installs Limine to your EFI system partition.
