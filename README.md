@@ -875,10 +875,10 @@ pacman -S \
   python-pip \
   uv
 
-# Install podman
-pacman -S podman podman-compose podman-docker
-# OR docker
+# Install docker
 pacman -S docker docker-compose
+# OR podman
+pacman -S podman podman-compose podman-docker
 
 # Install Idea
 pacman -S jetbrains-toolbox
