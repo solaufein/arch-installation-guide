@@ -1048,7 +1048,7 @@ sudo paccache -r
 
 # Find and manage pac files (pacnew, pacsave)
 pacdiff
-find /etc --name '*.pacnew' -o -name '*.pacsave'
+sudo find /etc -name '*.pacnew' -o -name '*.pacsave'
 grep '\.pacnew\|\.pacsave' /var/log/pacman.log
 
 # Export packages to txt
