@@ -856,7 +856,9 @@ pacman -S \
   libreoffice-fresh \
   gimp \
   qbittorrent \
-  inxi
+  inxi \
+  pacman-contrib \
+  fwupd
 
 pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 reboot
@@ -879,6 +881,8 @@ pacman -S \
   podman-docker
   
 paru -S brave-bin visual-studio-code-bin
+
+paru -S pacman-log-orphans-hook
 
 ## Sublime text
 curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
@@ -998,7 +1002,9 @@ sudo sysctl --system
 
 ---
 
-##  System Update Workflow
+##  System Maintenance
+https://wiki.archlinux.org/title/System_maintenance#Clean_the_filesystem
+
 With `snap-pac` installed, every `pacman` or `paru` update automatically creates pre/post snapshots.
 
 ```bash
@@ -1025,8 +1031,12 @@ pacman -Qeq > my_packages.txt
 # Remove package, not used dependencies and config files
 sudo pacman -Rns xxx
 
-# Check orphaned packages
+# Find orphaned packages
 sudo pacman -Qdt
+sudo pacman -Qdtt   # find also optionally required by other pacakge
+
+# Mark orphaned package as not orphan (to not remove it)
+sudo pacman -D --asexplicit xxx
 
 # Cleanup orphaned packages after removal
 sudo pacman -Qtdq | sudo pacman -Rns -
@@ -1036,10 +1046,10 @@ sudo pacman -Rns $(pacman -Qtdq)
 # Cleanup pacman cache (required package: pacman-contrib)
 sudo paccache -r
 
----
-##################################
-# Packages
-##################################
+# Find and manage pac files (pacnew, pacsave)
+pacdiff
+find /etc --name '*.pacnew' -o -name '*.pacsave'
+grep '\.pacnew\|\.pacsave' /var/log/pacman.log
 
 # Export packages to txt
 pacman -Qqen > pkglist-official.txt
