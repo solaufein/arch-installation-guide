@@ -871,8 +871,6 @@ pacman -S \
   dbeaver \
   jdk-openjdk \
   gradle \
-  pycharm-community-edition \
-  idea-community-edition \
   python \
   python-pip \
   uv \
@@ -880,7 +878,7 @@ pacman -S \
   podman-compose \
   podman-docker
   
-paru -S brave-bin visual-studio-code-bin
+paru -S brave-bin visual-studio-code-bin intellij-idea-community-edition pycharm-community-edition
 
 paru -S pacman-log-orphans-hook
 
