@@ -873,26 +873,38 @@ pacman -S \
   gradle \
   python \
   python-pip \
-  uv \
-  podman \
-  podman-compose \
-  podman-docker
-  
-paru -S brave-bin visual-studio-code-bin intellij-idea-community-edition pycharm-community-edition
+  uv
+
+# Install podman
+pacman -S podman podman-compose podman-docker
+# OR docker
+pacman -S docker docker-compose
+
+# Install Idea
+pacman -S jetbrains-toolbox
+jetbrains-toolbox   # GUI to install (recommended)
+# OR using Aur
+paru -S intellij-idea-community-edition pycharm-community-edition
+
+# Install VSCode
+paru -S visual-studio-code-bin
+
+# Install Brave
+paru -S brave-bin
 
 paru -S pacman-log-orphans-hook
 
-## Sublime text
+# Sublime text
 curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
 echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" | sudo tee -a /etc/pacman.conf
 sudo pacman -Syu sublime-text
 
-## Printer - Brother
-# Driver:
+# Printer
+## Brother Driver:
 paru -S brother-hl1210w
 
-# KDE -> System Settings -> Printers -> Add New...
-# Connection:
+## KDE -> System Settings -> Printers -> Add New...
+## Connection:
 lpd://192.168.2.140/
 ```
 
