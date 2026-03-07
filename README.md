@@ -678,6 +678,21 @@ resolvectl query google.com
 
 ---
 
+##  SSD TRIM Support
+```bash
+# Verify TRIM is supported
+sudo hdparm -I /dev/sda | grep -i trim
+
+# fstrim timer
+sudo systemctl enable fstrim.timer          # SSD TRIM (weekly)
+sudo systemctl status fstrim.timer
+
+# Verify discard=async is in fstab (it should be from our mount options)
+grep discard /etc/fstab
+```
+
+---
+
 ## ZSH SHELL
 https://wiki.archlinux.org/title/Zsh
 
@@ -730,21 +745,6 @@ p10k configure
 > Settings → Configure Konsole → General
 > Select: Remember window size
 > Select: Use system monospace font (optional)
-```
-
----
-
-##  TRIM Support (SSD Optimization)
-```bash
-# Verify TRIM is supported
-sudo hdparm -I /dev/sda | grep -i trim
-
-# fstrim timer
-sudo systemctl enable fstrim.timer          # SSD TRIM (weekly)
-sudo systemctl status fstrim.timer
-
-# Verify discard=async is in fstab (it should be from our mount options)
-grep discard /etc/fstab
 ```
 
 ---
