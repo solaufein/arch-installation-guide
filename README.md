@@ -642,6 +642,41 @@ systemctl enable --now ufw
 ```
 
 ---
+## DNS configuration secure systemd-resolved
+https://wiki.archlinux.org/title/Systemd-resolved
+
+```bash
+vim /etc/nsswitch.conf
+# hosts line should look like this:
+hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
+
+vim /etc/NetworkManager/conf.d/dns.conf
+[main]
+dns=systemd-resolved
+
+sudo systemctl enable --now systemd-resolved
+sudo ln -sf ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+sudo systemctl restart NetworkManager
+
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo vim /etc/systemd/resolved.conf.d/dns_servers.conf
+[Resolve]
+DNS=1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001
+FallbackDNS=8.8.8.8 9.9.9.9
+Domains=~.
+DNSOverTLS=yes
+MulticastDNS=no  #  Disable mDNS in systemd, we will use Avahi (to not conflict)
+
+sudo systemctl restart systemd-resolved
+
+# Verify
+resolvectl status #  Should show: +DefaultRoute +LLMNR -mDNS +DNSOverTLS
+resolvectl statistics
+resolvectl query google.com
+```
+
+---
 
 ## ZSH SHELL
 https://wiki.archlinux.org/title/Zsh
@@ -1101,6 +1136,9 @@ mtr wp.pl
 # Check drivers USB
 lsusb
 
+# Check modules
+lsmod
+
 # Check failed services
 systemctl --failed
 
@@ -1118,5 +1156,7 @@ journalctl -k
 sudo dmesg -T --level=err,warn
 sudo dmesg | less
 
+# DNS problems
+journalctl -u systemd-resolved -f
 
 ```
