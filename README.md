@@ -147,7 +147,7 @@ mount /dev/sda1 /mnt/boot
 sudo reflector --protocol https \
                --age 12 \
                --latest 10 \
-               --sort age \
+               --sort rate \
                --save /etc/pacman.d/mirrorlist
 ```
 
@@ -564,7 +564,7 @@ vim /etc/xdg/reflector/reflector.conf
 --protocol https
 --age 12
 --latest 10
---sort age
+--sort rate
 --save /etc/pacman.d/mirrorlist
 
 sudo systemctl enable --now reflector.timer
