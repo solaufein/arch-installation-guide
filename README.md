@@ -880,11 +880,11 @@ pacman -S docker docker-compose
 # OR podman
 pacman -S podman podman-compose podman-docker
 
-# Install Idea
+# Install JetBrains IDE
+pacman -S intellij-idea-community-edition pycharm-community-edition
+# OR using GUI
 pacman -S jetbrains-toolbox
-jetbrains-toolbox   # GUI to install (recommended)
-# OR using Aur
-paru -S intellij-idea-community-edition pycharm-community-edition
+jetbrains-toolbox 
 
 # Install VSCode
 paru -S visual-studio-code-bin
