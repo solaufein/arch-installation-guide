@@ -886,6 +886,7 @@ pacman -S \
   kate \
   ark \
   konsole \
+  kitty \
   plasma-nm \
   spectacle \
   libreoffice-fresh \
