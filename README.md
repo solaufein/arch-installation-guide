@@ -408,6 +408,7 @@ lspci -k -d ::03xx
 pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
 pacman -S libva-nvidia-driver libva-utils
 pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
+pacman -S nvtop   # GPU monitoring
 
 # Prevent nouveau from loading
 vim /etc/modprobe.d/blacklist-nouveau.conf
@@ -966,8 +967,7 @@ pacman -S \
   gamescope \          # Wayland gaming compositor (Valve)
   mangohud \           # Performance overlay
   lib32-mangohud \
-  vulkan-tools \
-  nvtop                # GPU monitoring
+  vulkan-tools
 
 # Enable GameMode daemon
 systemctl --user enable gamemoded   # Run after first login
