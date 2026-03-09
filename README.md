@@ -949,8 +949,13 @@ lpd://192.168.2.140/
 
 ##  Gaming Stack
 ```bash
+pacman -S steam
+
+vim /etc/sysctl.d/80-gamecompatibility.conf
+vm.max_map_count = 2147483642
+
+# Other
 pacman -S \
-  steam \
   lutris \
   wine \
   wine-mono \
