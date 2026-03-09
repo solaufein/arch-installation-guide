@@ -955,7 +955,7 @@ pacman -S steam
 vim /etc/sysctl.d/80-gamecompatibility.conf
 vm.max_map_count = 2147483642
 
-# Other
+# Other Optional:
 pacman -S \
   lutris \
   wine \
