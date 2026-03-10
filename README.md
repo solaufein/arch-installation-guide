@@ -348,6 +348,15 @@ vim /etc/iwd/main.conf
 [Regulatory]
 Country=PL
 
+# Disable powersave in networkmanager for wifi
+vim /etc/NetworkManager/conf.d/powersave.conf
+[connection]
+wifi.powersave=2
+
+# Disable aspm powersave for wifi driver mt7921e
+vim /etc/modprobe.d/mt7921e.conf
+options mt7921e disable_aspm=1
+
 systemctl enable NetworkManager
 ```
 
@@ -1132,10 +1141,12 @@ reboot
 # Logs and Errors
 ##################################
 
-# Check Ethernet info
+# Check Network/Ethernet
 lspci -k | grep -A 3 Ethernet
 lspci -k | grep -A 5 MEDIATEK
+lspci -k | grep -A 3 Network
 lspci | grep -i network
+
 inxi -N
 ip link
 ip link show enp11s0
