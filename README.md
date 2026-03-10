@@ -445,11 +445,12 @@ export __GLX_VENDOR_LIBRARY_NAME=nvidia
 
 # Wayland native apps
 export MOZ_ENABLE_WAYLAND=1
-export ELECTRON_OZONE_PLATFORM_HINT=auto
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
 
 # VRR / GSYNC support
 export __GL_GSYNC_ALLOWED=1
 export __GL_VRR_ALLOWED=1
+export __GL_MaxFramesAllowed=1
 export __NV_PRIME_RENDER_OFFLOAD=1
 
 # Hardware Acceleration (install nvidia-vaapi-driver!)
