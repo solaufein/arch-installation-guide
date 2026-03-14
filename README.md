@@ -343,7 +343,6 @@ systemctl enable avahi-daemon
 vim /etc/NetworkManager/conf.d/wifi-backend.conf
 [device]
 wifi.backend=iwd
-wifi.iwd.autoconnect=yes
 
 vim /etc/iwd/main.conf
 [Regulatory]
@@ -358,8 +357,7 @@ wifi.powersave=2
 vim /etc/modprobe.d/mt7921e.conf
 options mt7921e disable_aspm=1
 
-systemctl enable iwd
-systemctl enable NetworkManager
+systemctl enable NetworkManager  # Do not enable iwd, NetworkManager will handle it
 ```
 
 ---
