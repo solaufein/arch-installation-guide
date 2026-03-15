@@ -1031,6 +1031,10 @@ reboot
 
 ##  Optional: Security Hardening
 ```bash
+# Disable root ssh login
+sudo vim /etc/ssh/sshd_config.d/20-deny_root.conf
+PermitRootLogin no
+
 # Kernel hardening sysctl
 vim /etc/sysctl.d/99-security.conf
 # Disable IP forwarding
