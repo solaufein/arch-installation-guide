@@ -909,7 +909,8 @@ pacman -S \
   qbittorrent \
   inxi \
   pacman-contrib \
-  fwupd
+  fwupd \
+  openrgb
 
 pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 reboot
