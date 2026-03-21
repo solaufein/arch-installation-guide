@@ -1148,6 +1148,9 @@ reboot
 # Logs and Errors
 ##################################
 
+# Check Nvidia drivers
+lspci -k -d ::03xx
+
 # Check Network/Ethernet
 lspci -k | grep -A 3 Ethernet
 lspci -k | grep -A 5 MEDIATEK
