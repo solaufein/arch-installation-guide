@@ -335,7 +335,8 @@ pacman -S \
   iwd \          # Modern Wi-Fi backend
   avahi \        # mDNS/zeroconf
   wireless-regdb \
-  nss-mdns
+  nss-mdns \
+  ethtool
 
 systemctl enable avahi-daemon
 
@@ -348,10 +349,12 @@ vim /etc/iwd/main.conf
 [Regulatory]
 Country=PL
 
-# Disable powersave in networkmanager for wifi
+# Disable powersave and wake-on-lan in networkmanager
 vim /etc/NetworkManager/conf.d/powersave.conf
 [connection]
 wifi.powersave=2
+wifi.wake-on-wlan = ignore
+ethernet.wake-on-lan = ignore
 
 # Disable aspm powersave for wifi driver mt7921e
 vim /etc/modprobe.d/mt7921e.conf
