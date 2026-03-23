@@ -881,6 +881,22 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 ---
 
+## Mount storage without password:
+https://wiki.archlinux.org/title/Polkit#Bypass_password_prompt
+
+```bash
+/etc/polkit-1/rules.d/10-udisks2.rules
+polkit.addRule(function(action, subject) {
+    if ((action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
+         action.id == "org.freedesktop.udisks2.filesystem-mount") &&
+        subject.isInGroup("users")) {
+        return polkit.Result.YES;
+    }
+});
+```
+
+---
+
 ##  Useful Tools
 ```bash
 pacman -S \
