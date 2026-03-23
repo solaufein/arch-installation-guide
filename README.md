@@ -881,7 +881,7 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 ---
 
-## Mount storage without password:
+## Mount storage without password
 https://wiki.archlinux.org/title/Polkit#Bypass_password_prompt
 
 ```bash
@@ -893,6 +893,20 @@ polkit.addRule(function(action, subject) {
         return polkit.Result.YES;
     }
 });
+```
+
+---
+
+## Fix Scaling in apps
+
+```bash
+# Brave:
+vim ~/.config/brave-flags.conf
+--force-device-scale-factor=1.1
+
+# VSCode:
+Window: Zoom Level = 1
+Font Size = 17
 ```
 
 ---
