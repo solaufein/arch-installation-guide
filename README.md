@@ -153,7 +153,8 @@ sudo reflector --protocol https \
 
 ### Install base system
 ```bash
-vim /mnt/etc/vconsole.conf      # We need KEYMAP before, because pacstrap can raise some errors about missing vconsole
+# We need KEYMAP before, because pacstrap can raise some errors about missing vconsole
+vim /mnt/etc/vconsole.conf 
 KEYMAP=pl
 
 pacstrap -K /mnt \
@@ -300,7 +301,8 @@ sed -i "s/PLACEHOLDER_WINDOWS/${WINDOWS_UUID}/g" /boot/limine.conf
 ---
 
 ##  mkinitcpio — initramfs
-Creating initramfs is usually not required because mkinitcpio was run on installation kernel package with the pacstrap
+Creating initramfs is usually not required 
+because mkinitcpio was run on installation kernel package with the pacstrap
 
 ```bash
 mkinitcpio -P
@@ -397,6 +399,14 @@ reboot
 #
 
 ## First Boot
+
+### Update system clock
+```bash
+timedatectl set-ntp true
+timedatectl status
+```
+
+---
 
 ## AUR Helper (paru)
 ```bash
