@@ -889,7 +889,7 @@ https://wiki.archlinux.org/title/Polkit#Bypass_password_prompt
 polkit.addRule(function(action, subject) {
     if ((action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
          action.id == "org.freedesktop.udisks2.filesystem-mount") &&
-        subject.isInGroup("users")) {
+        subject.isInGroup("storage")) {
         return polkit.Result.YES;
     }
 });
@@ -915,6 +915,8 @@ Font Size = 17
 ```bash
 pacman -S \
   zsh \
+  fzf \
+  wl-clipboard \
   btop \
   fastfetch \
   bat eza fd ripgrep \
