@@ -1019,7 +1019,29 @@ pacman -S \
 systemctl --user enable gamemoded   # Run after first login
 
 # In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
-# For Proton: Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
+# For Proton: 
+# Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
+
+# Optional section (may be outaded or not needed):
+# Here are some NVIDIA settings that you can Optionally use if have some issues:
+# Append to file:
+vim ~/.config/plasma-workspace/env/nvidia-wayland.sh
+# --- NVIDIA (DLSS + Frame Gen + Ray Tracing) ---
+PROTON_ENABLE_NVAPI=1
+PROTON_ENABLE_NGX_UPDATER=1
+DXVK_NVAPI_GPU_ARCH=AD100
+VKD3D_CONFIG=dxr11,dxr
+NV_reg_EnableGpuFirmware=1
+# --- Smoothness (Stutter fix) ---
+__GL_SHADER_DISK_CACHE=1
+__GL_SHADER_DISK_CACHE_SIZE=4294967296
+GAMEMODE_AUTO=1
+# --- Compatibility ---
+PROTON_HIDE_NVIDIA_GPU=0
+PROTON_FORCE_LARGE_ADDRESS_AWARE=1
+
+# Gamescope command line in Steam Optionally if display is bad:
+gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-cursor -- %command%
 ```
 
 ---
@@ -1044,6 +1066,7 @@ paru -S corectrl
 ##  Optional: Flatpak
 ```bash
 pacman -S flatpak
+
 # Flatpak remote
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
