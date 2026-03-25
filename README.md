@@ -242,14 +242,17 @@ efibootmgr --create \
 ### Create Limine config
 ### Get UUIDs
 ```bash
-ROOT_UUID=$(blkid -s UUID -o value /dev/sda2)
+ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
+echo $ROOT_UUID
 
 # Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
 MACHINE_UUID=$(cat /etc/machine-id)
+echo $MACHINE_UUID
 
 # Get Windows EFI FAT32 parition ID
 lsblk -f      # find Windows disk/partition FAT32 label, eg: /dev/nvme0n1p1
 WINDOWS_UUID=$(sudo blkid -s PARTUUID -o value /dev/nvme0n1p1)
+echo $WINDOWS_UUID
 ```
 
 ```bash
