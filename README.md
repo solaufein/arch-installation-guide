@@ -1215,6 +1215,9 @@ sudo snapper -c root create -d "Before my experiment" --type single
 sudo snapper -c root rollback 5   # Rollback to snapshot #5
 reboot
 
+# Delete snapshot number 5
+snapper -c root delete 5
+
 ---
 ##################################
 # Logs and Errors
