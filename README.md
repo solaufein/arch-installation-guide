@@ -1070,6 +1070,9 @@ pacman -S power-profiles-daemon powerdevil
 # Ryzen power plans via KDE Power Management (power-profiles-daemon)
 sudo systemctl enable --now power-profiles-daemon
 
+# Set performance power profile (default is balanced)
+powerprofilesctl set performance
+
 # Install CoreCtrl for fine-grained AMD control (AUR)
 paru -S corectrl
 ```
