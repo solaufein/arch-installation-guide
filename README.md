@@ -702,6 +702,26 @@ sudo systemctl restart systemd-resolved
 resolvectl status #  Should show: +DefaultRoute +LLMNR -mDNS +DNSOverTLS
 resolvectl statistics
 resolvectl query google.com
+
+
+### OPTIONALLY ###
+# use Linux DoT:
+# Linux → (DoT TLS 853) → DNS Cloudflare/Google
+# instead of Router DoH:
+# Linux → (UDP/TCP 53) → UniFi Router → (DoH/HTTPS 443) → DNS Cloudflare/Google
+#
+# for Wi-Fi
+nmcli con show "warcraft_home"
+nmcli con modify "warcraft_home" ipv4.ignore-auto-dns yes
+nmcli con modify "warcraft_home" ipv4.dns "1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001"
+
+# for Ethernet
+nmcli con modify "Wired connection 1" ipv4.ignore-auto-dns yes
+nmcli con modify "Wired connection 1" ipv4.dns "1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001"
+
+# restart connections
+nmcli con down "warcraft_home" && nmcli con up "warcraft_home"
+nmcli con down "Wired connection 1" && nmcli con up "Wired connection 1"
 ```
 
 ---
