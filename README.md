@@ -1017,12 +1017,30 @@ echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable
 sudo pacman -Syu sublime-text
 
 # Printer
+## enable cups.socket or cups.service
+systemctl enable cups.socket
+
 ## Brother Driver:
 paru -S brother-hl1210w
 
 ## KDE -> System Settings -> Printers -> Add New...
 ## Connection:
 lpd://192.168.2.140/
+```
+
+---
+
+##  Paccache
+https://wiki.archlinux.org/title/Pacman
+
+```bash
+# (By default clean cache up to 3 last versions once per week).
+systemctl enable --now paccache.timer
+
+# Optionally install aur paccache-hook to cleanup cache after every pacman cmd
+paru -S paccache-hook
+# Edit default configuration:
+vim /etc/paccache-hook.conf
 ```
 
 ---
