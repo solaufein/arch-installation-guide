@@ -1097,6 +1097,29 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ---
 
+##  Optional: Mount Windows disk ntfs (eg M2_2)
+```bash
+sudo pacman -S ntfs-3g
+
+# get disk UUID
+lsblk -f
+
+# create mounting point
+sudo mkdir -p /mnt/M2_2
+
+# Update fstab
+sudo vim /etc/fstab
+UUID=YOUR_DISK_UUID  /mnt/M2_2  ntfs-3g  defaults,windows_names,uid=1000,gid=1000,umask=0022  0  0
+
+# Mount and check for erros
+sudo mount -a
+
+# Create symlink to your file on desktop
+ln -s "/mnt/M2_2/some_file.txt" ~/Desktop/some_file.txt
+```
+
+---
+
 ##  Optional: AMD CPU Tuning (Ryzen 7800X3D)
 https://wiki.archlinux.org/title/KDE#Power_management
 
