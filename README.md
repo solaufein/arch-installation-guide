@@ -1099,6 +1099,8 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ##  Optional: Mount Windows disk ntfs (eg M2_2)
 ```bash
+# Turn off Fast Startup on Windows
+
 sudo pacman -S ntfs-3g
 
 # get disk UUID
