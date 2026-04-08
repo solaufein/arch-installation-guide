@@ -1097,6 +1097,25 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ---
 
+##  Optional: Application Launcher Rofi
+https://wiki.archlinux.org/title/Rofi
+
+```bash
+sudo pacman -S rofi
+
+# Create configuration file:
+vim ~/.config/rofi/config.rasi
+
+# Use Catppuccin theme:
+https://github.com/catppuccin/rofi
+
+# Disable Shortcut for KRunner "Alt+Super"
+# Create new Shortcut "Alt+Super" for command:
+rofi -show drun -show-icons
+```
+
+---
+
 ##  Optional: Mount Windows disk ntfs (eg M2_2)
 ```bash
 # Turn off Fast Startup on Windows
