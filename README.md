@@ -1109,6 +1109,9 @@ vim ~/.config/rofi/config.rasi
 # Use Catppuccin theme:
 https://github.com/catppuccin/rofi
 
+# Check if you have proper MesloLGS Nerd Font:
+fc-list : family | grep -i "MesloLGS"
+
 # Disable Shortcut for KRunner "Alt+Super"
 # Create new Shortcut "Alt+Super" for command:
 rofi -show drun -show-icons
