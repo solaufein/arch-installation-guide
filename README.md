@@ -365,7 +365,9 @@ ethernet.wake-on-lan = ignore
 vim /etc/modprobe.d/mt7921e.conf
 options mt7921e disable_aspm=1
 
-systemctl enable NetworkManager  # Do not enable iwd, NetworkManager will handle it
+systemctl enable NetworkManager  
+# Optionally enable iwd, but normally the NetworkManager should handle it
+systemctl enable --now iwd
 ```
 
 ---
