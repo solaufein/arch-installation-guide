@@ -1027,7 +1027,15 @@ paru -S brother-hl1210w
 
 ## KDE -> System Settings -> Printers -> Add New...
 ## Connection:
-lpd://192.168.2.140/
+lpd://192.168.2.140/BINARY_P1
+# or using socket Connection:
+socket://192.168.2.140:9100
+
+# Optionally: add rule to not sleep printer usb:
+vim /etc/udev/rules.d/50-brother-printer.rules
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", ATTR{idProduct}=="06a", ATTR{control}="on"
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 ```
 
 ---
