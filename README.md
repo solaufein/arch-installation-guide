@@ -1023,8 +1023,9 @@ sudo pacman -Syu sublime-text
 ## enable cups.socket or cups.service
 systemctl enable cups.socket
 
+# Optional:
 systemctl enable cups-browsed
-# Go to Brave flags: brave://flags and Enable "CUPS IPP Printing Backend"
+# Optional: go to Brave flags: brave://flags and Enable "CUPS IPP Printing Backend"
 
 ## Brother Driver:
 paru -S brother-hl1210w
