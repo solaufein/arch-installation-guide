@@ -528,6 +528,10 @@ localectl status
 systemctl enable plasmalogin.service
 systemctl disable sddm.service
 
+sudo vim ~/.config/xdg-desktop-portal/portals.conf
+[preferred]
+default=kde
+
 reboot
 ```
 
