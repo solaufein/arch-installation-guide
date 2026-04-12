@@ -966,7 +966,6 @@ pacman -S \
   cups \
   cups-pdf \
   cups-filters \
-  cups-browsed \
   vlc \
   firefox \
   dolphin \
@@ -1027,10 +1026,6 @@ sudo pacman -Syu sublime-text
 ## enable cups.socket or cups.service
 systemctl enable cups.socket
 
-# Optional:
-systemctl enable cups-browsed
-# Optional: go to Brave flags: brave://flags and Enable "CUPS IPP Printing Backend"
-
 ## Brother Driver:
 paru -S brother-hl1210w
 
@@ -1040,11 +1035,16 @@ lpd://192.168.2.140/BINARY_P1
 # or using socket Connection:
 socket://192.168.2.140:9100
 
-# Optionally: add rule to not sleep printer usb:
+# Optional: add rule to not sleep printer usb:
 vim /etc/udev/rules.d/50-brother-printer.rules
 ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", ATTR{idProduct}=="06a", ATTR{control}="on"
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+
+# Optional:
+pacman -S cups-browsed
+systemctl enable cups-browsed
+# Optional: go to Brave flags: brave://flags and Enable "CUPS IPP Printing Backend"
 ```
 
 ---
