@@ -962,6 +962,7 @@ pacman -S \
   cups \
   cups-pdf \
   cups-filters \
+  cups-browsed \
   vlc \
   firefox \
   dolphin \
@@ -1018,9 +1019,12 @@ curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --
 echo -e "\n[sublime-text]\nServer = https://download.sublimetext.com/arch/stable/x86_64" | sudo tee -a /etc/pacman.conf
 sudo pacman -Syu sublime-text
 
-# Printer
+# Printer Brother
 ## enable cups.socket or cups.service
 systemctl enable cups.socket
+
+systemctl enable cups-browsed
+# Go to Brave flags: brave://flags and Enable "CUPS IPP Printing Backend"
 
 ## Brother Driver:
 paru -S brother-hl1210w
