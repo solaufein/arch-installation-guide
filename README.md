@@ -545,11 +545,11 @@ vim /etc/mkinitcpio.conf
 MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems fsck)
+HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems sd-btrfs-overlayfs fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 
-mkinitcpio -P
+sudo mkinitcpio -P
 
 # Using `systemd` hook set (modern replacement for udev/etc.)
 # `kms` hook ensures DRM is loaded early — needed for NVIDIA DRM modesetting.
