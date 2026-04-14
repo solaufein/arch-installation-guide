@@ -327,6 +327,11 @@ EDITOR=vim visudo
 pacman -S pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl
 
 # Services are user-level — they start automatically after first login.
+
+# Optional: set audio priority
+sudo vim /etc/modprobe.d/alsa-base.conf
+options snd-usb-audio index=0,1
+options snd-hda-intel index=2,3
 ```
 
 ---
