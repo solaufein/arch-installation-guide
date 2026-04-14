@@ -882,7 +882,7 @@ paru -S limine-mkinitcpio-hook
 
 # Update /etc/kernel/cmdline (default cmdline for all kernels):
 # ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
-echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw quiet nowatchdog splash zswap.enabled=0 ahci.mobile_lpm_policy=1" | sudo tee /etc/kernel/cmdline
+echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0 ahci.mobile_lpm_policy=1 usbcore.autosuspend=-1" | sudo tee /etc/kernel/cmdline
 
 limine-mkinitcpio
 
