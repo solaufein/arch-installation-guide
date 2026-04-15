@@ -235,7 +235,7 @@ cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 efibootmgr --create \
   --disk /dev/sda \
   --part 1 \
-  --label "Limine" \
+  --label "Arch Linux Limine" \
   --loader '\EFI\limine\BOOTX64.EFI' \
   --unicode
 ```
