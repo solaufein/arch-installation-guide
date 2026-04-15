@@ -1,7 +1,21 @@
 # Arch Linux Installation Guide 2026
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
 **Target disk:** `/dev/sda` | **Kernels:** linux, linux-lts, linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
-**Features:** btrfs, zram, snapper, snap-pac, ufw
+
+**Key Features:** 
+- btrfs (subvolumes: @, @home, @log, @cache, @tmp, @snapshots)
+- zram
+- snapper
+- snap-pac
+- limine-mkinitcpio-hook
+- limine-snapper-sync
+- ufw
+- NetworkManager (iwd)
+- avahi
+- systemd-resolved (DNSOverTLS)
+- zsh
+- powerlevel10k
+- rofi
 
 ---
 
@@ -942,7 +956,6 @@ polkit.addRule(function(action, subject) {
 ---
 
 ## Fix Scaling in apps
-
 ```bash
 # Brave:
 vim ~/.config/brave-flags.conf
