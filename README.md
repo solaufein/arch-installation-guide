@@ -13,6 +13,7 @@
 - NetworkManager (iwd)
 - avahi
 - systemd-resolved (DNSOverTLS)
+- reflector
 - zsh
 - powerlevel10k
 - rofi
