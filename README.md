@@ -1145,6 +1145,26 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ---
 
+##  Optional: VPN Proton
+https://wiki.archlinux.org/title/ProtonVPN
+
+```bash
+sudo pacman -S proton-vpn-cli gnome-keyring
+protonvpn status
+protonvpn signin <username>
+
+# Connect to Switzerland (CH)
+protonvpn connect --country CH
+
+# Disconnect
+protonvpn disconnect
+
+# Optional: enable autoconnect
+sudo systemctl enable --now protonvpn-autoconnect.service
+```
+
+---
+
 ##  Optional: Application Launcher Rofi
 https://wiki.archlinux.org/title/Rofi
 
@@ -1160,7 +1180,7 @@ https://github.com/catppuccin/rofi
 # Check if you have proper MesloLGS Nerd Font:
 fc-list : family | grep -i "MesloLGS"
 
-# Disable Shortcut for KRunner "Alt+Super"
+# Disable Shortcut for KDE KRunner "Alt+Super"
 # Create new Shortcut "Alt+Super" for command:
 rofi -show drun -show-icons
 ```
