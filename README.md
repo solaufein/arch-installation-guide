@@ -284,19 +284,19 @@ comment: machine-id=PLACEHOLDER_MACHINE
     //linux
         protocol: linux
         path: boot():/vmlinuz-linux
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 ahci.mobile_lpm_policy=1 usbcore.autosuspend=-1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
         module_path: boot():/initramfs-linux.img
     
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 ahci.mobile_lpm_policy=1 usbcore.autosuspend=-1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
         module_path: boot():/initramfs-linux-lts.img
     
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 ahci.mobile_lpm_policy=1 usbcore.autosuspend=-1
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
         module_path: boot():/initramfs-linux-zen.img
     
         //Snapshots
@@ -562,10 +562,10 @@ Configure HOOKS for Btrfs, NVIDIA, and encryption support
 
 ```bash
 vim /etc/mkinitcpio.conf
-MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+MODULES=(xhci_hcd usbhid btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect microcode kms modconf block keyboard sd-vconsole filesystems sd-btrfs-overlayfs fsck)
+HOOKS=(base systemd autodetect keyboard microcode modconf kms keymap sd-vconsole block filesystems sd-btrfs-overlayfs fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 
@@ -902,7 +902,7 @@ paru -S limine-mkinitcpio-hook
 
 # Update /etc/kernel/cmdline (default cmdline for all kernels):
 # ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
-echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0 ahci.mobile_lpm_policy=1 usbcore.autosuspend=-1" | sudo tee /etc/kernel/cmdline
+echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off" | sudo tee /etc/kernel/cmdline
 
 limine-mkinitcpio
 
