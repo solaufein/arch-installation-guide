@@ -1159,6 +1159,11 @@ protonvpn connect --country CH
 # Disconnect
 protonvpn disconnect
 
+# Configuration:
+protonvpn config set kill-switch standard
+protonvpn config set netshield malware-ads-trackers
+protonvpn config set ipv6 off
+
 # Optional: enable autoconnect
 sudo systemctl enable --now protonvpn-autoconnect.service
 ```
