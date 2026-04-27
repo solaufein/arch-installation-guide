@@ -739,10 +739,12 @@ resolvectl query google.com
 # for Wi-Fi
 nmcli con show "warcraft_home"
 nmcli con modify "warcraft_home" ipv4.ignore-auto-dns yes
+nmcli con modify "warcraft_home" ipv6.ignore-auto-dns yes
 nmcli con modify "warcraft_home" ipv4.dns "1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001"
 
 # for Ethernet
 nmcli con modify "Wired connection 1" ipv4.ignore-auto-dns yes
+nmcli con modify "Wired connection 1" ipv6.ignore-auto-dns yes
 nmcli con modify "Wired connection 1" ipv4.dns "1.1.1.1 1.0.0.1 2606:4700:4700::1111 2606:4700:4700::1001"
 
 # restart connections
