@@ -562,10 +562,10 @@ Configure HOOKS for Btrfs, NVIDIA, and encryption support
 
 ```bash
 vim /etc/mkinitcpio.conf
-MODULES=(xhci_hcd usbhid btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect keyboard microcode modconf kms keymap sd-vconsole block filesystems sd-btrfs-overlayfs fsck)
+HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems sd-btrfs-overlayfs fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 
