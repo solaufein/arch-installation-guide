@@ -559,6 +559,7 @@ reboot
 
 ##  mkinitcpio initramfs HOOKS/MODULES configuration
 Configure HOOKS for Btrfs, NVIDIA, and encryption support
+https://wiki.archlinux.org/title/Mkinitcpio#HOOKS
 
 ```bash
 vim /etc/mkinitcpio.conf
