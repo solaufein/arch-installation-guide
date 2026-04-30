@@ -508,33 +508,6 @@ chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 
 ---
 
-## NVIDIA mkinitcpio pacman hook
-Update NVIDIA module in initcpio after NVIDIA or kernel update
-
-```bash
-mkdir -p /etc/pacman.d/hooks
-
-vim /etc/pacman.d/hooks/nvidia.hook
-[Trigger]
-Operation=Install
-Operation=Upgrade
-Operation=Remove
-Type=Package
-Target=linux
-Target=linux-lts
-Target=linux-zen
-Target=nvidia-open-dkms
-
-[Action]
-Description=Update NVIDIA module in initcpio
-Depends=mkinitcpio
-When=PostTransaction
-NeedsTargets
-Exec=/usr/bin/limine-mkinitcpio'
-```
-
----
-
 ##  KDE Plasma (Wayland)
 ```bash
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
@@ -892,6 +865,10 @@ sudo systemctl enable --now limine-snapper-sync.service
 # Verify and trigger to check if it works
 sudo limine-snapper-sync
 
+# Optional: if issues about invalid subvolume /@snapshots then do this:
+sudo vim /etc/default/limine
+ROOT_SNAPSHOTS_PATH="/@snapshots"
+
 # After this, every snapper snapshot will get its own entry in the Limine boot menu.
 ```
 
@@ -922,6 +899,34 @@ limine-mkinitcpio
 
 # **Note:** The Windows entry uses `boot(windows)` — Limine will scan for the Windows EFI on another disk automatically. Adjust if needed.
 ```
+
+---
+
+## Create NVIDIA limine-mkinitcpio Hook
+Update NVIDIA module in initcpio after NVIDIA or kernel update
+
+```bash
+mkdir -p /etc/pacman.d/hooks
+
+vim /etc/pacman.d/hooks/nvidia.hook
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Operation=Remove
+Type=Package
+Target=linux
+Target=linux-lts
+Target=linux-zen
+Target=nvidia-open-dkms
+
+[Action]
+Description=Update NVIDIA module in initcpio
+Depends=mkinitcpio
+When=PostTransaction
+NeedsTargets
+Exec=/usr/bin/limine-mkinitcpio
+```
+
 ---
 
 ## Create Limine Hook:
@@ -947,7 +952,7 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 https://wiki.archlinux.org/title/Polkit#Bypass_password_prompt
 
 ```bash
-/etc/polkit-1/rules.d/10-udisks2.rules
+vim /etc/polkit-1/rules.d/10-udisks2.rules
 polkit.addRule(function(action, subject) {
     if ((action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
          action.id == "org.freedesktop.udisks2.filesystem-mount") &&
