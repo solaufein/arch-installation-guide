@@ -1153,7 +1153,7 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ---
 
-##  Optional: VPN Proton
+##  Optional: VPN Proton - CLI tool
 https://wiki.archlinux.org/title/ProtonVPN
 
 ```bash
@@ -1174,6 +1174,19 @@ protonvpn config set ipv6 off
 
 # Optional: enable autoconnect
 sudo systemctl enable --now protonvpn-autoconnect.service
+```
+---
+
+##  Optional: VPN Proton - WireGuard tool
+```bash
+sudo pacman -S wireguard-tools systemd-resolvconf
+
+# Download Proton WireGuard .conf files
+# Move the .conf files into /etc/wireguard
+# If using dash '-' then rename files because it is an issue
+
+systemct start systemd-resolved
+systemct enable systemd-resolved
 ```
 
 ---
