@@ -430,6 +430,22 @@ timedatectl status
 
 ---
 
+##  Pacman Configuration
+```bash
+vim /etc/pacman.conf
+Color
+VerbosePkgLists
+ParallelDownloads = 10
+ILoveCandy
+
+# Enable multilib (required for Steam/Wine 32-bit):
+# Uncomment [multilib] section:
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+```
+
+---
+
 ## AUR Helper (paru)
 ```bash
 # Login as your user, then:
@@ -563,22 +579,6 @@ lsinitcpio --early /boot/initramfs-linux.img | grep microcode
 # It should print:
 #kernel/x86/microcode/
 #kernel/x86/microcode/AuthenticAMD.bin
-```
-
----
-
-##  Pacman Configuration
-```bash
-vim /etc/pacman.conf
-Color
-VerbosePkgLists
-ParallelDownloads = 10
-ILoveCandy
-
-# Enable multilib (required for Steam/Wine 32-bit):
-# Uncomment [multilib] section:
-[multilib]
-Include = /etc/pacman.d/mirrorlist
 ```
 
 ---
@@ -1200,7 +1200,7 @@ rofi -show drun -show-icons
 
 ---
 
-##  Optional: Mount Windows disk ntfs (eg M2_2)
+##  Optional: Mount Windows disk ntfs (eg M2_1)
 ```bash
 # Turn off Fast Startup on Windows
 
@@ -1210,17 +1210,17 @@ sudo pacman -S ntfs-3g
 lsblk -f
 
 # create mounting point
-sudo mkdir -p /mnt/M2_2
+sudo mkdir -p /mnt/M2_1
 
 # Update fstab
 sudo vim /etc/fstab
-UUID=YOUR_DISK_UUID  /mnt/M2_2  ntfs-3g  defaults,windows_names,uid=1000,gid=1000,umask=0022  0  0
+UUID=YOUR_DISK_UUID  /mnt/M2_1  ntfs-3g  defaults,windows_names,uid=1000,gid=1000,umask=0022  0  0
 
 # Mount and check for erros
 sudo mount -a
 
 # Create symlink to your file on desktop
-ln -s "/mnt/M2_2/some_file.txt" ~/Desktop/some_file.txt
+ln -s "/mnt/M2_1/some_file.txt" ~/Desktop/some_file.txt
 ```
 
 ---
