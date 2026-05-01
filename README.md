@@ -565,7 +565,7 @@ vim /etc/mkinitcpio.conf
 MODULES=(btrfs nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 BINARIES=()
 FILES=()
-HOOKS=(base systemd autodetect microcode modconf kms keyboard keymap sd-vconsole block filesystems sd-btrfs-overlayfs fsck)
+HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems sd-btrfs-overlayfs fsck)
 COMPRESSION="zstd"
 COMPRESSION_OPTIONS=(-3)
 
