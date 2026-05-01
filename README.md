@@ -546,6 +546,16 @@ reboot
 
 ---
 
+##  Polish characters in KDE Plasma
+1. Open System Settings
+2. Go to Input Devices -> Keyboard
+3. Click tab Layouts
+4. Select Configure layouts
+5. Click + Add, in field Layout search Polish
+6. Apply
+
+---
+
 ##  mkinitcpio initramfs HOOKS/MODULES configuration
 Configure HOOKS for Btrfs, NVIDIA, and encryption support
 https://wiki.archlinux.org/title/Mkinitcpio#HOOKS
