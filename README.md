@@ -1,6 +1,12 @@
 # Arch Linux Installation Guide 2026
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
-**Target disk:** `/dev/sda` | **Kernels:** linux, linux-lts, linux-zen | **DE:** KDE Plasma (Wayland) | **Boot:** Limine
+**Target disk:** `/dev/sda`
+
+**Kernels:** linux, linux-lts, linux-zen
+
+**DE:** KDE Plasma (Wayland) or GNOME (Wayland)
+
+**Boot:** Limine
 
 **Key Features:** 
 - btrfs (subvolumes: @, @home, @log, @cache, @tmp, @snapshots)
@@ -284,19 +290,19 @@ comment: machine-id=PLACEHOLDER_MACHINE
     //linux
         protocol: linux
         path: boot():/vmlinuz-linux
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux.img
     
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux-lts.img
     
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
-        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off
+        cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux-zen.img
     
         //Snapshots
@@ -528,6 +534,8 @@ chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
 ```bash
 pacman -S plasma-meta kde-applications-meta plasma-login-manager
 pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
+pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
+pacman -S dolphin kate konsole
 pacman -S papirus-icon-theme
 
 localectl status
@@ -541,6 +549,38 @@ sudo vim ~/.config/xdg-desktop-portal/portals.conf
 [preferred]
 default=kde
 
+reboot
+
+# Optional: if missing dirs, create user dirs like Home, Documents etc
+xdg-user-dirs-update
+```
+
+---
+
+##  GNOME (Wayland)
+https://wiki.archlinux.org/title/GNOME
+
+```bash
+pacman -S gnome gnome-extra
+systemctl enable gdm.service
+
+vim /etc/systemd/system/getty@tty1.service.d/wayland.conf
+[Service]
+Environment=XDG_SESSION_TYPE=wayland
+
+reboot
+
+loginctl session-status
+
+
+# Optional: if switching from KDE, uninstall not needed packages:
+pacman -Rs plasma-meta kde-applications-meta xdg-desktop-portal-kde plasma-login-manager
+pacman -Rs kde-gtk-config konsole dolphin kate
+sudo pacman -Qtdq | sudo pacman -Rns -
+rm ~/.config/xdg-desktop-portal/portals.conf
+systemctl disable plasmalogin.service
+systemctl disable sddm.service
+systemctl enable gdm.service
 reboot
 ```
 
@@ -892,7 +932,7 @@ paru -S limine-mkinitcpio-hook
 
 # Update /etc/kernel/cmdline (default cmdline for all kernels):
 # ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
-echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0 usbcore.autosuspend=-1 pcie_aspm=off" | sudo tee /etc/kernel/cmdline
+echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0" | sudo tee /etc/kernel/cmdline
 
 limine-mkinitcpio
 
@@ -1010,10 +1050,7 @@ pacman -S \
   cups-filters \
   vlc \
   firefox \
-  dolphin \
-  kate \
   ark \
-  konsole \
   kitty \
   plasma-nm \
   spectacle \
@@ -1024,10 +1061,6 @@ pacman -S \
   pacman-contrib \
   fwupd \
   openrgb
-
-pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
-reboot
-xdg-user-dirs-update    # Create user dirs like Home, Documents etc
 
 pacman -S \
   jdk21-openjdk \
