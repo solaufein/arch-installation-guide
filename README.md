@@ -1,6 +1,6 @@
 # Arch Linux Installation Guide 2026
 ### MSI MAG B650 Tomahawk · Ryzen 7800X3D · RTX 4070 Ti · 32 GB RAM
-**Target disk:** `/dev/sda`
+**Target disk:** `/dev/nvme1n1` (M2 NVME)
 
 **Kernels:** linux, linux-lts, linux-zen
 
@@ -13,8 +13,8 @@
 - zram
 - snapper
 - snap-pac
-- limine-mkinitcpio-hook
 - limine-snapper-sync
+- limine-mkinitcpio-hook
 - ufw
 - NetworkManager (iwd)
 - avahi
@@ -23,6 +23,7 @@
 - zsh
 - powerlevel10k
 - rofi
+- fzf
 
 ---
 
@@ -90,8 +91,8 @@ meaning both live on one Btrfs partition but are independently snapshotted. This
 rollback the system without touching your personal files.
 
 ```
-/dev/sda1  →  4GB        EFI System Partition (FAT32)
-/dev/sda2  →  REST       Btrfs main partition (root + home)
+/dev/nvme1n1p1  →  4GB        EFI System Partition (FAT32)
+/dev/nvme1n1p2  →  REST       Btrfs main partition (root + home)
 ```
 
 > No separate swap partition — we use **zram** (configured in Part 2).
@@ -100,26 +101,26 @@ rollback the system without touching your personal files.
 ```bash
 # Verify your target disk
 lsblk -f
-fdisk -l /dev/sda
+fdisk -l /dev/nvme1n1
 
 # Wipe existing partition table
-sgdisk --zap-all /dev/sda
+sgdisk --zap-all /dev/nvme1n1
 
 # Create partitions
-sgdisk -n 1:0:+4G    -t 1:ef00 -c 1:"EFI"   /dev/sda
-sgdisk -n 2:0:0      -t 2:8300 -c 2:"ARCH"  /dev/sda
+sgdisk -n 1:0:+4G    -t 1:ef00 -c 1:"EFI"   /dev/nvme1n1
+sgdisk -n 2:0:0      -t 2:8300 -c 2:"ARCH"  /dev/nvme1n1
 
 # Verify
-lsblk /dev/sda
+lsblk /dev/nvme1n1
 ```
 
 ### Format partitions
 ```bash
 # EFI
-mkfs.fat -F32 -n EFI /dev/sda1
+mkfs.fat -F32 -n EFI /dev/nvme1n1p1
 
 # Btrfs
-mkfs.btrfs -L ARCH -f /dev/sda2
+mkfs.btrfs -L ARCH -f /dev/nvme1n1p2
 ```
 
 ---
@@ -128,7 +129,7 @@ mkfs.btrfs -L ARCH -f /dev/sda2
 
 ### Mount and create subvolumes
 ```bash
-mount /dev/sda2 /mnt
+mount /dev/nvme1n1p2 /mnt
 
 # Create subvolumes — flat layout (recommended for snapper)
 btrfs subvolume create /mnt/@           # root
@@ -146,17 +147,17 @@ umount /mnt
 # Common Btrfs mount options (optimized for SSD + NVMe)
 BTRFS_OPTS="rw,noatime,compress=zstd:1,space_cache=v2,commit=120,ssd"
 
-mount -o ${BTRFS_OPTS},subvol=@           /dev/sda2 /mnt
+mount -o ${BTRFS_OPTS},subvol=@           /dev/nvme1n1p2 /mnt
 mkdir -p /mnt/{boot,home,var/log,var/cache,tmp,.snapshots}
 
-mount -o ${BTRFS_OPTS},subvol=@home       /dev/sda2 /mnt/home
-mount -o ${BTRFS_OPTS},subvol=@log        /dev/sda2 /mnt/var/log
-mount -o ${BTRFS_OPTS},subvol=@cache      /dev/sda2 /mnt/var/cache
-mount -o ${BTRFS_OPTS},subvol=@tmp        /dev/sda2 /mnt/tmp
-mount -o ${BTRFS_OPTS},subvol=@snapshots  /dev/sda2 /mnt/.snapshots
+mount -o ${BTRFS_OPTS},subvol=@home       /dev/nvme1n1p2 /mnt/home
+mount -o ${BTRFS_OPTS},subvol=@log        /dev/nvme1n1p2 /mnt/var/log
+mount -o ${BTRFS_OPTS},subvol=@cache      /dev/nvme1n1p2 /mnt/var/cache
+mount -o ${BTRFS_OPTS},subvol=@tmp        /dev/nvme1n1p2 /mnt/tmp
+mount -o ${BTRFS_OPTS},subvol=@snapshots  /dev/nvme1n1p2 /mnt/.snapshots
 
 # Mount EFI
-mount /dev/sda1 /mnt/boot
+mount /dev/nvme1n1p1 /mnt/boot
 ```
 
 ---
@@ -247,14 +248,14 @@ passwd
 pacman -S limine efibootmgr
 
 # Deploy Limine EFI
-# limine bios-install /dev/sda   # BIOS fallback (optional but good practice)
+# limine bios-install /dev/nvme1n1   # BIOS fallback (optional but good practice)
 # cp -v /usr/share/limine/limine-uefi-cd.bin /boot/
 mkdir -p /boot/EFI/limine
 cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 # Register Limine with UEFI
 efibootmgr --create \
-  --disk /dev/sda \
+  --disk /dev/nvme1n1 \
   --part 1 \
   --label "Arch Linux Limine" \
   --loader '\EFI\limine\BOOTX64.EFI' \
@@ -264,7 +265,7 @@ efibootmgr --create \
 ### Create Limine config
 ### Get UUIDs
 ```bash
-ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
+ROOT_UUID=$(sudo blkid -s UUID -o value /dev/nvme1n1p2)
 echo $ROOT_UUID
 
 # Get machine-id for custom comment (optional, useful for identifying entries in multi-boot)
@@ -781,7 +782,7 @@ nmcli con down "Wired connection 1" && nmcli con up "Wired connection 1"
 ##  SSD TRIM Support
 ```bash
 # Verify TRIM is supported
-sudo hdparm -I /dev/sda | grep -i trim
+sudo hdparm -I /dev/nvme1n1 | grep -i trim
 
 # fstrim timer
 sudo systemctl enable fstrim.timer          # SSD TRIM (weekly)
@@ -931,7 +932,7 @@ Automatically update kernel boot entries in /boot/limine.conf whenever kernels a
 paru -S limine-mkinitcpio-hook
 
 # Update /etc/kernel/cmdline (default cmdline for all kernels):
-# ROOT_UUID=$(sudo blkid -s UUID -o value /dev/sda2)
+# ROOT_UUID=$(sudo blkid -s UUID -o value /dev/nvme1n1p2)
 echo "root=UUID=ROOT_UUID rootflags=subvol=@ rw nowatchdog zswap.enabled=0" | sudo tee /etc/kernel/cmdline
 
 limine-mkinitcpio
@@ -1268,9 +1269,10 @@ lsblk -f
 # create mounting point
 sudo mkdir -p /mnt/M2_1
 
-# Update fstab
+# Update fstab (get disk UUID: lsblk -f)
 sudo vim /etc/fstab
 UUID=YOUR_DISK_UUID  /mnt/M2_1  ntfs-3g  defaults,windows_names,uid=1000,gid=1000,umask=0022  0  0
+#eg. UUID=1CE2DE8BE2DE6912  /mnt/M2_1  ntfs-3g  defaults,windows_names,uid=1000,gid=1000,umask=0022  0  0
 
 # Mount and check for erros
 sudo mount -a
