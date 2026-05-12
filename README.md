@@ -1300,10 +1300,15 @@ pacman -S power-profiles-daemon powerdevil
 # Ryzen power plans via KDE Power Management (power-profiles-daemon)
 sudo systemctl enable --now power-profiles-daemon
 
-# Set performance power profile (default is balanced)
+# Optional: set Performance power profile (default is Balanced)
 powerprofilesctl set performance
 
-# Install CoreCtrl for fine-grained AMD control (AUR)
+# Install CoolerControl (AUR) to control your fans
+paru -S coolercontrol liquidctl lm_sensors
+sudo systemctl enable --now coolercontrold
+# Create profiles for cpu and gpu fan curves and apply them to your fans
+
+# Optional: install CoreCtrl for fine-grained AMD control (AUR)
 paru -S corectrl
 ```
 
