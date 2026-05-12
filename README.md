@@ -1310,13 +1310,28 @@ sudo modprobe nct6687
 # Install CoolerControl (AUR) to control your fans
 paru -S coolercontrol liquidctl lm_sensors
 sudo systemctl enable --now coolercontrold
-# Then create profiles for cpu and gpu fan curves and apply them to your fans
+# Then create profiles for cpu and gpu fan curves and apply them to your fans:
+# cpu1:
+#  0st   - 20%
+#  40st  - 35%
+#  65st  - 45%
+#  89st  - 100%
+#  100st - 100%
+# 
+# gpu1:
+#  0st   - 0%
+#  50st  - 0%
+#  60st  - 40%
+#  70st  - 60%
+#  80st  - 85%
+#  90st  - 100%
+
 
 # Optional: if missing sensors:
 sudo sensors-detect
 sudo systemctl restart coolercontrold
 
-# Optional: install CoreCtrl for fine-grained AMD control (AUR) instead of CoolerControl
+# Optional: install CoreCtrl (AUR) instead of CoolerControl
 paru -S corectrl
 ```
 
