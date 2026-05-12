@@ -1308,6 +1308,10 @@ paru -S coolercontrol liquidctl lm_sensors
 sudo systemctl enable --now coolercontrold
 # Create profiles for cpu and gpu fan curves and apply them to your fans
 
+# If missing sensors:
+sudo sensors-detect
+sudo systemctl restart coolercontrold
+
 # Optional: install CoreCtrl for fine-grained AMD control (AUR)
 paru -S corectrl
 ```
