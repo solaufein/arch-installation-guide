@@ -1289,7 +1289,7 @@ ln -s "/mnt/M2_1/some_file.txt" ~/Desktop/some_file.txt
 
 ---
 
-##  Optional: AMD CPU Tuning (Ryzen 7800X3D)
+##  Optional: Power management and Fans control
 https://wiki.archlinux.org/title/KDE#Power_management
 
 ```bash
@@ -1303,16 +1303,20 @@ sudo systemctl enable --now power-profiles-daemon
 # Optional: set Performance power profile (default is Balanced)
 powerprofilesctl set performance
 
+# Install MSI MAG B650 Tomahawk Wifi MB driver for sensors
+paru -S nct6687d-dkms-git
+sudo modprobe nct6687
+
 # Install CoolerControl (AUR) to control your fans
 paru -S coolercontrol liquidctl lm_sensors
 sudo systemctl enable --now coolercontrold
-# Create profiles for cpu and gpu fan curves and apply them to your fans
+# Then create profiles for cpu and gpu fan curves and apply them to your fans
 
-# If missing sensors:
+# Optional: if missing sensors:
 sudo sensors-detect
 sudo systemctl restart coolercontrold
 
-# Optional: install CoreCtrl for fine-grained AMD control (AUR)
+# Optional: install CoreCtrl for fine-grained AMD control (AUR) instead of CoolerControl
 paru -S corectrl
 ```
 
