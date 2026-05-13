@@ -499,6 +499,8 @@ systemctl enable nvidia-resume.service
 
 # Verify modeset
 cat /sys/module/nvidia_drm/parameters/modeset   # should be Y
+
+# Open nvidia-settings, go to PowerMizer, and set the "Preferred Mode" to "Maximum Performance"
 ```
 
 ---
