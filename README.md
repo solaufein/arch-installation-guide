@@ -556,6 +556,7 @@ reboot
 
 # Optional: Install Layan Theme
 paru -S gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git kvantum-qt6-git tela-icon-theme-git layan-cursor-theme-git
+paru -S bibata-cursor-theme-bin
 # 1. System Settings > Colors & Themes > Global Theme > Select Layan and click Apply
 # 2. System Settings > Colors & Themes > Application Style > Dropdown for "Application Style," Select KvantumDark and Apply
 # 3. System Settings > Colors & Themes > Application Style > Configure GNOME/GTK Application Style > Set GTK2 and GTK3 themes to Layan-Dark
