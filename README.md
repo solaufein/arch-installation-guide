@@ -1314,13 +1314,24 @@ sudo modprobe nct6687
 paru -S coolercontrol liquidctl lm_sensors
 sudo systemctl enable --now coolercontrold
 # Then create profiles for cpu and gpu fan curves and apply them to your fans:
-# cpu1:
+# cpu1 bios:
 #  0st   - 20%
 #  40st  - 35%
 #  65st  - 45%
 #  89st  - 100%
 #  100st - 100%
-# 
+#
+# OR...
+#
+# cpu1 silent:
+#  0st   - 0%
+#  25st  - 20%
+#  40st  - 35%
+#  65st  - 45%
+#  80st  - 75%
+#  89st  - 100%
+#  100st - 100%
+#
 # gpu1:
 #  0st   - 0%
 #  50st  - 0%
