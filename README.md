@@ -1065,6 +1065,8 @@ pacman -S \
   plasma-nm \
   spectacle \
   libreoffice-fresh \
+  libreoffice-fresh-pl \
+  hunspell-pl \
   gimp \
   qbittorrent \
   inxi \
