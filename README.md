@@ -587,6 +587,16 @@ reboot
 
 loginctl session-status
 
+# Optional: install dash-to-dock extension
+# https://github.com/micheleg/dash-to-dock
+pacman -S gnome-tweaks gnome-shell-extensions sassc
+paru -S gnome-shell-extension-dash-to-dock
+
+# Optional: Install Papirus icon Theme
+pacman -S papirus-icon-theme
+
+# Optional: Install Bibata cursor Theme
+paru -S bibata-cursor-theme-bin
 
 # Optional: if switching from KDE, uninstall not needed packages:
 pacman -Rs plasma-meta kde-applications-meta xdg-desktop-portal-kde plasma-login-manager
