@@ -554,12 +554,17 @@ default=kde
 
 reboot
 
+# Optional: Install Bibata cursor Theme
+paru -S bibata-cursor-theme-bin
+
 # Optional: Install Layan Theme
 paru -S gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git kvantum-qt6-git tela-icon-theme-git layan-cursor-theme-git
-paru -S bibata-cursor-theme-bin
 # 1. System Settings > Colors & Themes > Global Theme > Select Layan and click Apply
 # 2. System Settings > Colors & Themes > Application Style > Dropdown for "Application Style," Select KvantumDark and Apply
 # 3. System Settings > Colors & Themes > Application Style > Configure GNOME/GTK Application Style > Set GTK2 and GTK3 themes to Layan-Dark
+
+# Optional: Install WhiteSur Theme
+paru -S whitesur-gtk-theme-git whitesur-kde-theme-git whitesur-icon-theme-git whitesur-cursor-theme-git kvantum-qt6-git gtk-engine-murrine sassc
 
 # Optional: if missing dirs, create user dirs like Home, Documents etc
 xdg-user-dirs-update
