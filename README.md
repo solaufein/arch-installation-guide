@@ -539,7 +539,6 @@ pacman -S plasma-meta kde-applications-meta plasma-login-manager
 pacman -S xorg-xwayland xdg-desktop-portal-kde qt6-wayland qt5-wayland
 pacman -S kde-gtk-config gtk3 gtk4 xdg-utils xdg-user-dirs
 pacman -S dolphin kate konsole
-pacman -S papirus-icon-theme
 
 localectl status
 # Should be KEYMAP=pl, if not then run: "sudo localectl set-keymap pl"
@@ -553,6 +552,12 @@ sudo vim ~/.config/xdg-desktop-portal/portals.conf
 default=kde
 
 reboot
+
+# Optional: Install Papirus icon Theme
+pacman -S papirus-icon-theme
+
+# Optional: Install Reversal icon Theme
+paru -S reversal-icon-theme-git
 
 # Optional: Install Bibata cursor Theme
 paru -S bibata-cursor-theme-bin
@@ -594,6 +599,9 @@ paru -S gnome-shell-extension-dash-to-dock
 
 # Optional: Install Papirus icon Theme
 pacman -S papirus-icon-theme
+
+# Optional: Install Reversal icon Theme
+paru -S reversal-icon-theme-git
 
 # Optional: Install Bibata cursor Theme
 paru -S bibata-cursor-theme-bin
