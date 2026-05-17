@@ -592,10 +592,14 @@ reboot
 
 loginctl session-status
 
-# Optional: install dash-to-dock extension
-# https://github.com/micheleg/dash-to-dock
-pacman -S gnome-tweaks gnome-shell-extensions sassc
-paru -S gnome-shell-extension-dash-to-dock
+# Optional: Install Extensions
+pacman -S extension-manager gnome-tweaks gnome-shell-extension-appindicator
+paru -S gnome-shell-extension-dash-to-dock gnome-shell-extension-caffeine gnome-shell-extension-blur-my-shell-git
+
+reboot
+
+# Optional: Install Tela icon Theme
+paru -S tela-icon-theme-git
 
 # Optional: Install Papirus icon Theme
 pacman -S papirus-icon-theme
