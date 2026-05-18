@@ -1195,6 +1195,8 @@ systemctl --user enable gamemoded   # Run after first login
 # For Proton: 
 # Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
 
+# Add to your Steam launch options for your AAA games, and you’ll have the full DLSS/Ray Tracing experience:
+PROTON_ENABLE_NVAPI=1 VKD3D_CONFIG=dxr %command% 
 
 # Gamescope command line in Steam Optionally if display is bad:
 gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-cursor -- %command%
