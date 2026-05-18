@@ -478,21 +478,13 @@ lspci -k -d ::03xx
 pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
 pacman -S libva-nvidia-driver libva-utils
 pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
-pacman -S nvtop   # GPU monitoring
+pacman -S nvtop
 
-# Prevent nouveau from loading
-vim /etc/modprobe.d/blacklist-nouveau.conf
-blacklist nouveau
-options nouveau modeset=0
-
-# NVIDIA DRM modesetting (required for Wayland)
+# NVIDIA conf
 vim /etc/modprobe.d/nvidia.conf
-options nvidia_drm modeset=1 fbdev=1
-options nvidia NVreg_UsePageAttributeTable=1
 options nvidia NVreg_PreserveVideoMemoryAllocations=1
-options nvidia NVreg_EnableGpuFirmware=0
 
-# Enable NVIDIA services for suspend/resume
+# Optional: Enable NVIDIA services for suspend/resume
 systemctl enable nvidia-suspend.service
 systemctl enable nvidia-hibernate.service
 systemctl enable nvidia-resume.service
@@ -508,27 +500,19 @@ cat /sys/module/nvidia_drm/parameters/modeset   # should be Y
 ##  NVIDIA Fine-Tuning (Wayland)
 ```bash
 # Environment variables for Wayland NVIDIA
-mkdir -p ~/.config/plasma-workspace/env
+mkdir -p ~/.config/environment.d
 
-vim ~/.config/plasma-workspace/env/nvidia-wayland.sh
-export LIBVA_DRIVER_NAME=nvidia
-export GBM_BACKEND=nvidia-drm
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
-# Wayland native apps
-export MOZ_ENABLE_WAYLAND=1
-export ELECTRON_OZONE_PLATFORM_HINT=wayland
-
-# VRR / GSYNC support
-export __GL_GSYNC_ALLOWED=1
-export __GL_VRR_ALLOWED=1
-export __GL_MaxFramesAllowed=1
-export __NV_PRIME_RENDER_OFFLOAD=1
-
+vim ~/.config/environment.d/nvidia.conf
+LIBVA_DRIVER_NAME=nvidia
 # Hardware Acceleration (install nvidia-vaapi-driver!)
-export NVD_BACKEND=direct
+NVD_BACKEND=direct
+ELECTRON_OZONE_PLATFORM_HINT=auto
+# Increases Shader Cache size to 4GB to prevent stuttering in large games
+# (Default is often 1GB, which is too small for 2026 titles)
+__GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1
+__GL_SHADER_DISK_CACHE_SIZE=4294967296
 
-chmod +x ~/.config/plasma-workspace/env/nvidia-wayland.sh
+chmod +x ~/.config/environment.d/nvidia.conf
 ```
 
 ---
@@ -1211,23 +1195,6 @@ systemctl --user enable gamemoded   # Run after first login
 # For Proton: 
 # Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
 
-# Optional section (may be outaded or not needed):
-# Here are some NVIDIA settings that you can Optionally use if have some issues:
-# Append to file:
-vim ~/.config/plasma-workspace/env/nvidia-wayland.sh
-# --- NVIDIA (DLSS + Frame Gen + Ray Tracing) ---
-PROTON_ENABLE_NVAPI=1
-PROTON_ENABLE_NGX_UPDATER=1
-DXVK_NVAPI_GPU_ARCH=AD100
-VKD3D_CONFIG=dxr11,dxr
-NV_reg_EnableGpuFirmware=1
-# --- Smoothness (Stutter fix) ---
-__GL_SHADER_DISK_CACHE=1
-__GL_SHADER_DISK_CACHE_SIZE=4294967296
-GAMEMODE_AUTO=1
-# --- Compatibility ---
-PROTON_HIDE_NVIDIA_GPU=0
-PROTON_FORCE_LARGE_ADDRESS_AWARE=1
 
 # Gamescope command line in Steam Optionally if display is bad:
 gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-cursor -- %command%
