@@ -180,7 +180,8 @@ vim /mnt/etc/vconsole.conf
 KEYMAP=pl
 
 pacstrap -K /mnt \
-  base base-devel linux linux-headers linux-firmware \
+  base base-devel linux-firmware \
+  linux linux-headers \
   linux-lts linux-lts-headers \
   linux-zen linux-zen-headers \
   amd-ucode \
@@ -213,6 +214,7 @@ arch-chroot /mnt
 
 ### Timezone & locale
 ```bash
+# Timezone
 ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 hwclock --systohc
 
@@ -350,7 +352,7 @@ pacman -S pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavuco
 
 # Services are user-level — they start automatically after first login.
 
-# Optional: set audio priority
+# Optional: Set audio priority
 sudo vim /etc/modprobe.d/alsa-base.conf
 options snd-usb-audio index=0,1
 options snd-hda-intel index=2,3
@@ -381,19 +383,20 @@ vim /etc/iwd/main.conf
 [Regulatory]
 Country=PL
 
-# Disable powersave and wake-on-lan in networkmanager
+systemctl enable NetworkManager  
+
+# Optional: Disable powersave and wake-on-lan in networkmanager
 vim /etc/NetworkManager/conf.d/powersave.conf
 [connection]
 wifi.powersave=2
 wifi.wake-on-wlan = ignore
 ethernet.wake-on-lan = ignore
 
-# Disable aspm powersave for wifi driver mt7921e
+# Optional: Disable aspm powersave for wifi driver mt7921e
 vim /etc/modprobe.d/mt7921e.conf
 options mt7921e disable_aspm=1
 
-systemctl enable NetworkManager  
-# Optionally enable iwd, but normally the NetworkManager should handle it
+# Optional: Enable iwd, but normally the NetworkManager should handle it
 systemctl enable --now iwd
 ```
 
@@ -428,11 +431,15 @@ reboot
 #
 
 ## First Boot
-
-### Update system clock
 ```bash
+# Login as your user
+
+# Update system clock
 timedatectl set-ntp true
 timedatectl status
+
+# Update system
+sudo pacman -Syu
 ```
 
 ---
@@ -455,9 +462,6 @@ Include = /etc/pacman.d/mirrorlist
 
 ## AUR Helper (paru)
 ```bash
-# Login as your user, then:
-sudo pacman -Syu
-
 # Install paru
 pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/paru.git /tmp/paru
@@ -574,12 +578,14 @@ Environment=XDG_SESSION_TYPE=wayland
 
 reboot
 
+# Verify its: wayland
+echo $XDG_SESSION_TYPE
+
 loginctl session-status
 
 # Optional: Install Extensions
 pacman -S extension-manager gnome-tweaks gnome-shell-extension-appindicator
 paru -S gnome-shell-extension-dash-to-dock gnome-shell-extension-caffeine gnome-shell-extension-blur-my-shell-git
-
 reboot
 
 # Optional: Install Tela icon Theme
