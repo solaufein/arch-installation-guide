@@ -555,6 +555,7 @@ paru -S gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git kvantum-
 # 1. System Settings > Colors & Themes > Global Theme > Select Layan and click Apply
 # 2. System Settings > Colors & Themes > Application Style > Dropdown for "Application Style," Select KvantumDark and Apply
 # 3. System Settings > Colors & Themes > Application Style > Configure GNOME/GTK Application Style > Set GTK2 and GTK3 themes to Layan-Dark
+# 4. Open Kvantum > Change/Delete Theme > LayanSolidDark > Click 'Use This Theme'
 
 # Optional: Install WhiteSur Theme
 paru -S whitesur-kde-theme whitesur-icon-theme whitesur-cursor-theme kvantum-theme-whitesur-git
