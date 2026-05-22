@@ -557,8 +557,7 @@ paru -S gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git kvantum-
 # 3. System Settings > Colors & Themes > Application Style > Configure GNOME/GTK Application Style > Set GTK2 and GTK3 themes to Layan-Dark
 
 # Optional: Install WhiteSur Theme
-paru -S whitesur-gtk-theme-git whitesur-kde-theme-git whitesur-icon-theme-git whitesur-cursor-theme-git kvantum-qt6-git gtk-engine-murrine sassc
-
+paru -S whitesur-kde-theme whitesur-icon-theme whitesur-cursor-theme kvantum-theme-whitesur-git
 # Optional: if missing dirs, create user dirs like Home, Documents etc
 xdg-user-dirs-update
 ```
