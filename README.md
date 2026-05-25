@@ -558,7 +558,7 @@ paru -S gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git kvantum-
 # 4. Open Kvantum > Change/Delete Theme > LayanSolidDark > Click 'Use This Theme'
 
 # Optional: Install WhiteSur Theme
-paru -S whitesur-kde-theme whitesur-icon-theme whitesur-cursor-theme-git kvantum-theme-whitesur-git
+paru -S whitesur-kde-theme whitesur-icon-theme whitesur-cursor-theme-git kvantum-theme-whitesur-git qwhitesurgtkdecorations-qt5 qwhitesurgtkdecorations-qt6
 # Optional: if missing dirs, create user dirs like Home, Documents etc
 xdg-user-dirs-update
 ```
