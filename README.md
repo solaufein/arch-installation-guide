@@ -569,7 +569,7 @@ xdg-user-dirs-update
 https://wiki.archlinux.org/title/GNOME
 
 ```bash
-pacman -S gnome gnome-extra
+pacman -S gnome gnome-extra gnome-tweaks extension-manager xdg-desktop-portal-gnome
 systemctl enable gdm.service
 
 vim /etc/systemd/system/getty@tty1.service.d/wayland.conf
@@ -601,8 +601,10 @@ paru -S reversal-icon-theme-git
 paru -S bibata-cursor-theme-bin
 
 # Optional: if switching from KDE, uninstall not needed packages:
-pacman -Rs plasma-meta kde-applications-meta xdg-desktop-portal-kde plasma-login-manager
-pacman -Rs kde-gtk-config konsole dolphin kate
+pacman -Rns plasma-meta kde-applications-meta xdg-desktop-portal-kde plasma-login-manager qt6-wayland qt5-wayland
+pacman -Rns kde-gtk-config konsole dolphin kate kvantum
+paru -Rns kvantum-qt6-git kvantum-theme-whitesur-git
+paru -Rns gtk-engine-murrine plasma6-themes-layan-git layan-gtk-theme-git tela-icon-theme-git layan-cursor-theme-git
 sudo pacman -Qtdq | sudo pacman -Rns -
 rm ~/.config/xdg-desktop-portal/portals.conf
 systemctl disable plasmalogin.service
