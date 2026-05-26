@@ -1496,6 +1496,11 @@ reboot
 # Delete snapshot number 5
 snapper -c root delete 5
 
+# Rsync backup important files to pendrive
+pacman -S rsync
+rsync -av --delete --exclude-from="$HOME/backup-excludes.txt" --info=progress2 ~/ /run/media/$USER/T7/arch-linux-backup-v2/
+
+
 ---
 ##################################
 # Logs and Errors
