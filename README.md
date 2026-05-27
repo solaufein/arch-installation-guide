@@ -569,7 +569,8 @@ xdg-user-dirs-update
 https://wiki.archlinux.org/title/GNOME
 
 ```bash
-pacman -S gnome gnome-extra gnome-tweaks extension-manager xdg-desktop-portal-gnome
+pacman -S gnome gnome-tweaks extension-manager xdg-desktop-portal-gnome
+# Optional: pacman -S gnome-extra
 systemctl enable gdm.service
 
 vim /etc/systemd/system/getty@tty1.service.d/wayland.conf
@@ -585,7 +586,11 @@ loginctl session-status
 
 # Optional: Install Extensions
 pacman -S extension-manager gnome-tweaks gnome-shell-extension-appindicator
-paru -S gnome-shell-extension-dash-to-dock gnome-shell-extension-caffeine gnome-shell-extension-blur-my-shell-git
+# Open Extension Manager and search for:
+# - appindicator
+# - dash to dock
+# - caffeine
+# - blur my shell
 reboot
 
 # Optional: Install Tela icon Theme
