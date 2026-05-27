@@ -585,8 +585,9 @@ echo $XDG_SESSION_TYPE
 loginctl session-status
 
 # Optional: Install Extensions
-pacman -S extension-manager gnome-tweaks gnome-shell-extension-appindicator
+pacman -S extension-manager gnome-tweaks 
 # Open Extension Manager and search for:
+# - hot edge (jdoda)
 # - appindicator
 # - dash to dock
 # - caffeine
