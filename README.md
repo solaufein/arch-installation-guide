@@ -203,7 +203,7 @@ pacstrap -K /mnt \
 ```bash
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Verify — should show all 7 subvolumes + EFI
+# Verify — should show all subvolumes + EFI
 cat /mnt/etc/fstab
 ```
 
