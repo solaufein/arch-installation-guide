@@ -9,7 +9,7 @@
 **Boot:** Limine
 
 **Key Features:** 
-- btrfs (subvolumes: @, @home, @log, @cache, @tmp, @snapshots)
+- btrfs (subvolumes: @, @home, @log, @cache, @snapshots)
 - zram
 - snapper
 - snap-pac
@@ -136,8 +136,9 @@ btrfs subvolume create /mnt/@           # root
 btrfs subvolume create /mnt/@home       # home (NOT snapshotted with root — safe rollbacks)
 btrfs subvolume create /mnt/@log        # /var/log (preserve logs across rollbacks)
 btrfs subvolume create /mnt/@cache      # /var/cache (exclude from snapshots)
-btrfs subvolume create /mnt/@tmp        # /tmp
 btrfs subvolume create /mnt/@snapshots  # /.snapshots (snapper stores here)
+
+# Note: We skipped /mnt/@tmp to let systemd handle it via RAM (tmpfs)
 
 umount /mnt
 ```
@@ -148,12 +149,11 @@ umount /mnt
 BTRFS_OPTS="rw,noatime,compress=zstd:1,space_cache=v2,commit=120,ssd"
 
 mount -o ${BTRFS_OPTS},subvol=@           /dev/nvme1n1p2 /mnt
-mkdir -p /mnt/{boot,home,var/log,var/cache,tmp,.snapshots}
+mkdir -p /mnt/{boot,home,var/log,var/cache,.snapshots}
 
 mount -o ${BTRFS_OPTS},subvol=@home       /dev/nvme1n1p2 /mnt/home
 mount -o ${BTRFS_OPTS},subvol=@log        /dev/nvme1n1p2 /mnt/var/log
 mount -o ${BTRFS_OPTS},subvol=@cache      /dev/nvme1n1p2 /mnt/var/cache
-mount -o ${BTRFS_OPTS},subvol=@tmp        /dev/nvme1n1p2 /mnt/tmp
 mount -o ${BTRFS_OPTS},subvol=@snapshots  /dev/nvme1n1p2 /mnt/.snapshots
 
 # Mount EFI
