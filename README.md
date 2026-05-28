@@ -1084,6 +1084,7 @@ pacman -S \
   cups-pdf \
   cups-filters \
   vlc \
+  vlc-plugins-all \   
   firefox \
   ark \
   kitty \
