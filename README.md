@@ -1219,6 +1219,17 @@ gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-curs
 
 ---
 
+##  Optional: Man pages
+```bash
+pacman -S man-db man-pages
+pacman -S tldr
+
+# vim .zshrc
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
+```
+
+---
+
 ##  Optional: VPN Proton - CLI tool
 https://wiki.archlinux.org/title/ProtonVPN
 
