@@ -45,7 +45,7 @@
 
 ##  Pre-Installation Setup
 
-### Set keyboard layout and font
+### Optional: Set keyboard layout and font (by default US)
 ```bash
 loadkeys pl
 setfont Lat2-Terminus16
@@ -63,7 +63,7 @@ ping ping.archlinux.org
 
 ip link
 
-# Wi-Fi (if you dont have LAN internet connection):
+# Optional: Wi-Fi (if you dont have LAN internet connection):
 iwctl
   device list
   device wlan0 set-property Powered on
@@ -175,10 +175,13 @@ sudo reflector --protocol https \
 
 ### Install base system
 ```bash
-# We need KEYMAP before, because pacstrap can raise some errors about missing vconsole
+# Optional: 
+# If changed default console keyboard layout, then we need a KEYMAP before, 
+# because pacstrap can raise some errors about missing vconsole
 vim /mnt/etc/vconsole.conf 
 KEYMAP=pl
 
+# Choose what kernels you want to install (linux, linux-lts, linux-zen)
 pacstrap -K /mnt \
   base base-devel linux-firmware \
   linux linux-headers \
@@ -541,6 +544,14 @@ default=kde
 
 reboot
 
+##  Polish characters in KDE Plasma
+1. Open System Settings
+2. Go to Input Devices -> Keyboard
+3. Click tab Layouts
+4. Select Configure layouts
+5. Click + Add, in field Layout search Polish
+6. Apply
+
 # Optional: Install Papirus icon Theme
 pacman -S papirus-icon-theme
 
@@ -594,6 +605,9 @@ pacman -S extension-manager gnome-tweaks
 # - blur my shell
 reboot
 
+# Optional: Install WhiteSur icon Theme
+paru -S whitesur-icon-theme
+
 # Optional: Install Tela icon Theme
 paru -S tela-icon-theme-git
 
@@ -605,6 +619,7 @@ paru -S reversal-icon-theme-git
 
 # Optional: Install Bibata cursor Theme
 paru -S bibata-cursor-theme-bin
+
 
 # Optional: if switching from KDE, uninstall not needed packages:
 pacman -Rns plasma-meta kde-applications-meta xdg-desktop-portal-kde plasma-login-manager qt6-wayland qt5-wayland
@@ -618,16 +633,6 @@ systemctl disable sddm.service
 systemctl enable gdm.service
 reboot
 ```
-
----
-
-##  Polish characters in KDE Plasma
-1. Open System Settings
-2. Go to Input Devices -> Keyboard
-3. Click tab Layouts
-4. Select Configure layouts
-5. Click + Add, in field Layout search Polish
-6. Apply
 
 ---
 
@@ -789,7 +794,7 @@ resolvectl statistics
 resolvectl query google.com
 
 
-### OPTIONALLY ###
+### OPTIONAL ###
 # use Linux DoT:
 # Linux → (DoT TLS 853) → DNS Cloudflare/Google
 # instead of Router DoH:
@@ -887,12 +892,14 @@ p10k configure
 ##  Snapper — Btrfs Snapshots with Pre/Post System Updates
 https://wiki.archlinux.org/title/Snapper#Creating_a_new_configuration
 
-### Install snapper and snap-pac and btrfs-assistant
 ```bash
+# Install snapper and snap-pac and btrfs-assistant
 pacman -S snapper
 pacman -S snap-pac     # automatically creates **pre** and **post** snapshots around every `pacman` transaction
 pacman -S btrfs-assistant    # GUI for snapper
 ```
+
+---
 
 ### Configure snapper for root
 ```bash
@@ -913,6 +920,8 @@ mount -a      # this will use /etc/fstab configuration to mount again /.snapshot
 sudo snapper -c root list
 sudo cat /etc/snapper/configs/root
 ```
+
+---
 
 ### Tune snapper cleanup policy
 ```bash
