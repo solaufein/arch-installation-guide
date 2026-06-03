@@ -1261,6 +1261,7 @@ protonvpn config set ipv6 off
 # Optional: enable autoconnect
 sudo systemctl enable --now protonvpn-autoconnect.service
 ```
+
 ---
 
 ##  Optional: VPN Proton - WireGuard tool
