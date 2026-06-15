@@ -1506,6 +1506,12 @@ pacman -Qqem > pkglist-aur.txt
 sudo pacman -S --needed - < pkglist-official.txt
 paru -S --needed - < pkglist-aur.txt
 
+# AUR check package pkgbuild file
+https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=YOUR_PACKAGE_NAME
+
+# AUR malware check
+https://github.com/lenucksi/aur-malware-check
+
 ---
 ##################################
 # Backups
