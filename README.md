@@ -1042,6 +1042,30 @@ Exec = /usr/bin/cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 
 ---
 
+## Create Log Orphans Hook:
+If you do not want to install it from AUR:
+```bash
+paru -S pacman-log-orphans-hook
+```
+
+Create Log orphans hook manually:
+```bash
+vim /etc/pacman.d/hooks/log-orphans.hook
+[Trigger]
+Operation=Install
+Operation=Upgrade
+Operation=Remove
+Type=Package
+Target=*
+
+[Action]
+Description=Log Orphan Packages
+When=PostTransaction
+Exec=/bin/bash -c 'pkgs="$(pacman -Qtdq)"; if [[ ! -z "$pkgs" ]]; then echo -e "The following packages are installed but not required (anymore):\n$pkgs\nYou can mark them as explicitly installed with '\''pacman -D --asexplicit <pkg>'\'' or remove them all using '\''pacman -Qtdq | pacman -Rns -'\''"; fi'
+```
+
+---
+
 ## Mount storage without password
 https://wiki.archlinux.org/title/Polkit#Bypass_password_prompt
 
@@ -1136,9 +1160,6 @@ paru -S visual-studio-code-bin
 
 # Install Brave
 paru -S brave-bin
-
-# Install Pacman Log orphans hook
-paru -S pacman-log-orphans-hook
 
 # Install Sublime text
 curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
