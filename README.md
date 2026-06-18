@@ -1180,13 +1180,17 @@ sudo pacman -Syu sublime-text
 
 ## Printer Brother
 ```bash
+## Brother Driver official:
+paru -S brother-hl1210w
+## OR Brother Driver opensource:
+paru -S brlaser
+
 ## enable cups.socket or cups.service
 systemctl enable cups.socket
 
-## Brother Driver:
-paru -S brother-hl1210w
+reboot
 
-## KDE -> System Settings -> Printers -> Add New...
+## Optional: KDE -> System Settings -> Printers -> Add New...
 ## Connection:
 lpd://192.168.2.140/BINARY_P1
 # or using socket Connection:
