@@ -856,7 +856,19 @@ plugins=(
   zsh-syntax-highlighting
 )
 
-# Install Powerlevel10k
+# Install MesloLGS font
+# https://www.nerdfonts.com/font-downloads
+pacman -S ttf-meslo-nerd
+fc-cache -fv
+
+# Install Starship prompt
+pacman -S starship
+
+vim .zshrc
+# comment-out ZSH_THEME=...
+eval "$(starship init zsh)"
+
+# Optional: Install Powerlevel10k prompt
 # https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#arch-linux
 paru -S --noconfirm zsh-theme-powerlevel10k-git
 echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
@@ -866,15 +878,9 @@ disable ZSH_THEME in .zshrc
 # vim .zshrc
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Install MesloLGS font for p10k
-# https://www.nerdfonts.com/font-downloads
-pacman -S ttf-meslo-nerd
-fc-cache -fv
-
-# Configure p10k
 p10k configure
 
-# Configure Konsole:
+# Optional: Configure Konsole (KDE):
 > Konsole → Settings → Edit Current Profile → Appearance
 > Select Font: MesloLGS NF Regular
 > Select Font size
