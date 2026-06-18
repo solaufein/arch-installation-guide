@@ -868,6 +868,9 @@ vim .zshrc
 # comment-out ZSH_THEME=...
 eval "$(starship init zsh)"
 
+mkdir -p ~/.config && touch ~/.config/starship.toml
+starship preset pure-preset -o ~/.config/starship.toml
+
 # Optional: Install Powerlevel10k prompt
 # https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#arch-linux
 paru -S --noconfirm zsh-theme-powerlevel10k-git
