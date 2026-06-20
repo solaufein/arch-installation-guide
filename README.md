@@ -8,7 +8,7 @@
 
 **Boot:** Limine
 
-**Key Features:** 
+**Key Features:**
 - btrfs (subvolumes: @, @home, @log, @cache, @snapshots)
 - zram
 - snapper
@@ -175,10 +175,10 @@ sudo reflector --protocol https \
 
 ### Install base system
 ```bash
-# Optional: 
-# If changed default console keyboard layout, then we need a KEYMAP before, 
+# Optional:
+# If changed default console keyboard layout, then we need a KEYMAP before,
 # because pacstrap can raise some errors about missing vconsole
-vim /mnt/etc/vconsole.conf 
+vim /mnt/etc/vconsole.conf
 KEYMAP=pl
 
 # Choose what kernels you want to install (linux, linux-lts, linux-zen)
@@ -298,21 +298,21 @@ comment: machine-id=PLACEHOLDER_MACHINE
         path: boot():/vmlinuz-linux
         cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux.img
-    
+
     //linux-lts
         protocol: linux
         path: boot():/vmlinuz-linux-lts
         cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux-lts.img
-    
+
     //linux-zen
         protocol: linux
         path: boot():/vmlinuz-linux-zen
         cmdline: root=UUID=PLACEHOLDER_ROOT rootflags=subvol=@ rw nowatchdog zswap.enabled=0
         module_path: boot():/initramfs-linux-zen.img
-    
+
         //Snapshots
-        
+
 /+Other systems and bootloaders
     //Windows
         protocol: efi
@@ -328,7 +328,7 @@ sed -i "s/PLACEHOLDER_WINDOWS/${WINDOWS_UUID}/g" /boot/limine.conf
 ---
 
 ##  mkinitcpio — initramfs
-Creating initramfs is usually not required 
+Creating initramfs is usually not required
 because mkinitcpio was run on installation kernel package with the pacstrap
 
 ```bash
@@ -386,7 +386,7 @@ vim /etc/iwd/main.conf
 [Regulatory]
 Country=PL
 
-systemctl enable NetworkManager  
+systemctl enable NetworkManager
 
 # Optional: Disable powersave and wake-on-lan in networkmanager
 vim /etc/NetworkManager/conf.d/powersave.conf
@@ -482,7 +482,7 @@ https://wiki.archlinux.org/title/NVIDIA
 lspci -k -d ::03xx
 
 # Install NVIDIA open kernel modules (RTX 4070 Ti supports open drivers)
-pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings 
+pacman -S nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings
 pacman -S libva-nvidia-driver libva-utils
 pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
 pacman -S nvtop
@@ -596,7 +596,7 @@ echo $XDG_SESSION_TYPE
 loginctl session-status
 
 # Optional: Install Extensions
-pacman -S extension-manager gnome-tweaks 
+pacman -S extension-manager gnome-tweaks
 # Open Extension Manager and search for:
 # - hot edge (jdoda)
 # - appindicator
@@ -664,7 +664,7 @@ reboot
   https://wiki.archlinux.org/title/Microcode#Limine
 
 ```bash
-lsinitcpio --early /boot/initramfs-linux.img | grep microcode 
+lsinitcpio --early /boot/initramfs-linux.img | grep microcode
 
 # It should print:
 #kernel/x86/microcode/
@@ -753,7 +753,7 @@ ufw allow from 192.168.0.0/16 to any port 1900 proto udp
 ufw enable
 ufw status verbose
 
-# Start and enable "ufw.service" to make it available at boot. 
+# Start and enable "ufw.service" to make it available at boot.
 # Note that this will not work if "iptables.service" is also enabled
 systemctl enable --now ufw
 ```
@@ -951,7 +951,7 @@ NUMBER_LIMIT_IMPORTANT="10"
 sudo systemctl enable --now snapper-cleanup.timer
 
 # Optional if timeline disabled:
-# sudo systemctl enable --now snapper-timeline.timer 
+# sudo systemctl enable --now snapper-timeline.timer
 
 # Allow user access to snapshots:
 sudo snapper -c root set-config ALLOW_USERS=$(whoami)
@@ -1047,7 +1047,7 @@ vim /etc/pacman.d/hooks/99-limine.hook
 Operation = Install
 Operation = Upgrade
 Type = Package
-Target = limine              
+Target = limine
 
 [Action]
 Description = Deploying Limine after upgrade...
@@ -1132,10 +1132,11 @@ pacman -S \
   cups-pdf \
   cups-filters \
   vlc \
-  vlc-plugins-all \   
+  vlc-plugins-all \
   firefox \
   ark \
   kitty \
+  ghostty \
   plasma-nm \
   spectacle \
   libreoffice-fresh \
@@ -1168,7 +1169,7 @@ pacman -S podman podman-compose podman-docker
 pacman -S intellij-idea-community-edition pycharm-community-edition
 # OR using GUI
 pacman -S jetbrains-toolbox
-jetbrains-toolbox 
+jetbrains-toolbox
 
 # Install VSCode
 paru -S visual-studio-code-bin
@@ -1256,11 +1257,11 @@ pacman -S \
 systemctl --user enable gamemoded   # Run after first login
 
 # In Steam: Right-click game → Properties → Launch Options: `gamemoderun %command%`
-# For Proton: 
+# For Proton:
 # Enable in Steam → Settings → Compatibility → Enable Steam Play for all games → Use Proton Experimental
 
 # Add to your Steam launch options for your AAA games, and you’ll have the full DLSS/Ray Tracing experience:
-PROTON_ENABLE_NVAPI=1 VKD3D_CONFIG=dxr %command% 
+PROTON_ENABLE_NVAPI=1 VKD3D_CONFIG=dxr %command%
 
 # Gamescope command line in Steam Optionally if display is bad:
 gamescope -w 1920 -h 1440 -W 2560 -H 1440 -r 165 -S stretch -f --force-grab-cursor -- %command%
@@ -1440,8 +1441,8 @@ pacman -S flatpak-kcm
 # Install firmware updates tool:
 pacman -S fwupd
 reboot
-# Commands after: 
-# fwupdmgr get-devices, 
+# Commands after:
+# fwupdmgr get-devices,
 # fwupdmgr get-updates
 ```
 
