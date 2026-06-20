@@ -856,10 +856,16 @@ plugins=(
   zsh-syntax-highlighting
 )
 
-# Install MesloLGS font
+# Install Jetbrains Nerd font
+pacman -S ttf-jetbrains-mono-nerd
+fc-cache -fv
+fc-list : family | grep -i "jetbrains"
+
+# Optional: Install MesloLGS font
 # https://www.nerdfonts.com/font-downloads
 pacman -S ttf-meslo-nerd
 fc-cache -fv
+fc-list : family | grep -i "meslo"
 
 # Install Starship prompt
 pacman -S starship
@@ -1323,9 +1329,6 @@ vim ~/.config/rofi/config.rasi
 
 # Use Catppuccin theme:
 https://github.com/catppuccin/rofi
-
-# Check if you have proper MesloLGS Nerd Font:
-fc-list : family | grep -i "MesloLGS"
 
 # Disable Shortcut for KDE KRunner "Alt+Super"
 # Create new Shortcut "Alt+Super" for command:
