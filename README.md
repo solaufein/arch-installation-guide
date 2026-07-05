@@ -1478,8 +1478,7 @@ sudo aa-status
 sudo vim /etc/ssh/sshd_config.d/20-deny_root.conf
 PermitRootLogin no
 
-# Optional:
-# Kernel hardening sysctl
+# Optional: Kernel hardening sysctl
 vim /etc/sysctl.d/99-security.conf
 # Disable IP forwarding
 net.ipv4.ip_forward = 0
