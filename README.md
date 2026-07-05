@@ -1460,6 +1460,9 @@ lsm=landlock,lockdown,yama,integrity,apparmor,bpf
 
 sudo systemctl enable --now apparmor.service
 
+sudo limine-mkinitcpio
+sudo reboot
+sudo aa-status
 ```
 
 ---
