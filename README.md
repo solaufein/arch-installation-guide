@@ -1448,6 +1448,22 @@ reboot
 
 ---
 
+##  Optional: AppArmor
+https://wiki.archlinux.org/title/AppArmor
+
+```bash
+pacman -S apparmor
+
+# Add kernel parameter
+vim /etc/kernel/cmdline
+lsm=landlock,lockdown,yama,integrity,apparmor,bpf
+
+sudo systemctl enable --now apparmor.service
+
+```
+
+---
+
 ##  Security Hardening
 ```bash
 # Disable root ssh login
