@@ -1133,7 +1133,6 @@ pacman -S \
   cups-filters \
   vlc \
   vlc-plugins-all \
-  firefox \
   ark \
   kitty \
   ghostty \
@@ -1174,7 +1173,13 @@ jetbrains-toolbox
 # Install VSCode
 paru -S visual-studio-code-bin
 
-# Install Brave
+# Install Firefox
+pacman -S firefox
+# Wpisz "about:config" w pasek adresu,
+# wyszukaj "media.ffmpeg.vaapi.enabled" i ustaw na true.
+# Upewnij się też, że masz zainstalowane pakiety libva-mesa-driver, intel-media-driver lub nvidia-utils (w zależności od Twojej karty graficznej).
+
+# Optional: Install Brave
 paru -S brave-bin
 
 # Install Sublime text
