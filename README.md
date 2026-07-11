@@ -737,14 +737,19 @@ ufw default allow outgoing
 
 # Allow from local networks (vlans)
 sudo ufw allow from 192.168.1.0/24
-sudo ufw allow from 192.168.2.0/24
-sudo ufw allow from 192.168.99.0/24
 
-# Allow mDNS (Avahi/Bonjour) IPv4 and IPv6 link-local (fe80::/10)
-ufw allow from 192.168.0.0/16 to any port 5353 proto udp
-ufw allow from ff02::fb to any port 5353 proto udp
-# Allow SSDP (UPnP/Device Discovery) IPv4
-ufw allow from 192.168.0.0/16 to any port 1900 proto udp
+# Pełne zaufanie TYLKO dla Twojej sieci głównej (VLAN 1)
+sudo ufw allow from 192.168.1.0/24
+
+# Bezpieczny mDNS (Wyszukiwanie drukarki/TV w sieci domowej)
+# Ograniczone tylko do sieci Default i IoT. Sieć Guest (99) nie ma dostępu.
+sudo ufw allow from 192.168.1.0/24 to any port 5353 proto udp
+sudo ufw allow from 192.168.2.0/24 to any port 5353 proto udp
+sudo ufw allow from ff02::fb to any port 5353 proto udp
+
+# Bezpieczny SSDP / UPnP (Wykrywanie urządzeń DLNA/Smart TV)
+sudo ufw allow from 192.168.1.0/24 to any port 1900 proto udp
+sudo ufw allow from 192.168.2.0/24 to any port 1900 proto udp
 
 # Optional ssh access
 # ufw allow ssh
