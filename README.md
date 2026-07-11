@@ -1234,10 +1234,20 @@ https://wiki.archlinux.org/title/Pacman
 # (By default clean cache up to 3 last versions once per week).
 systemctl enable --now paccache.timer
 
-# Optionally install aur paccache-hook to cleanup cache after every pacman cmd
-paru -S paccache-hook
-# Edit default configuration:
-vim /etc/paccache-hook.conf
+# Optionally setup custom hook:
+vim /etc/pacman.d/hooks/paccache.hook
+[Trigger]
+Operation = Upgrade
+Operation = Install
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Cleaning pacman cache and keeping latest 2 versions...
+When = PostTransaction
+Exec = /usr/bin/paccache -rvk2
+Depends = pacman-contrib
 ```
 
 ---
