@@ -1327,14 +1327,16 @@ sudo systemctl enable --now protonvpn-autoconnect.service
 
 ##  Optional: VPN Proton - WireGuard tool
 ```bash
-sudo pacman -S wireguard-tools systemd-resolvconf
+sudo pacman -S wireguard-tools
+
+# Optional: users of systemd-resolved should make sure that systemd-resolvconf is installed
+sudo pacman -S systemd-resolvconf
+systemct start systemd-resolved
+systemct enable systemd-resolved
 
 # Download Proton WireGuard .conf files
 # Move the .conf files into /etc/wireguard
 # If using dash '-' then rename files because it is an issue
-
-systemct start systemd-resolved
-systemct enable systemd-resolved
 ```
 
 ---
