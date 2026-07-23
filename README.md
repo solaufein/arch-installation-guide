@@ -1338,7 +1338,7 @@ systemct enable systemd-resolved
 
 # Download Proton WireGuard .conf files
 # Move the .conf files into /etc/wireguard
-# If using dash '-' then rename files because it is an issue
+# If using dash '-' then rename files because it is an issue, use eg wg0, wg1, etc
 
 nmcli connection import type wireguard file /etc/wireguard/wg0.conf
 nmcli conn up [connection]
@@ -1351,6 +1351,9 @@ nmcli connection modify wg1 autoconnect no
 
 # Setup automatic retry connection after manual enable
 nmcli connection modify wg0 connection.autoconnect-retries 0
+
+# check autoconnect
+nmcli -f NAME,TYPE,AUTOCONNECT connection show
 
 ```
 
