@@ -1345,15 +1345,16 @@ nmcli conn up [connection]
 nmcli conn down [connection]
 nmcli conn
 
-# Setup autoconnect
+# Setup autoconnect (no, means by default VPN is disabled and you need to enable it manually)
 nmcli connection modify wg0 autoconnect no
 nmcli connection modify wg1 autoconnect no
 
-# Setup automatic retry connection after manual enable
+# Setup automatic retry connection, eg for wg0 (0 means forever, -1 is default)
 nmcli connection modify wg0 connection.autoconnect-retries 0
 
-# check autoconnect
+# check autoconnect and autoconnect-retries
 nmcli -f NAME,TYPE,AUTOCONNECT connection show
+nmcli connection show wg0 | grep -E "connection.autoconnect|connection.autoconnect-retries"
 
 ```
 
