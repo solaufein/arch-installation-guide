@@ -1344,6 +1344,14 @@ nmcli connection import type wireguard file /etc/wireguard/wg0.conf
 nmcli conn up [connection]
 nmcli conn down [connection]
 nmcli conn
+
+# Setup autoconnect
+nmcli connection modify wg0 autoconnect no
+nmcli connection modify wg1 autoconnect no
+
+# Setup automatic retry connection after manual enable
+nmcli connection modify wg0 connection.autoconnect-retries 0
+
 ```
 
 ---
