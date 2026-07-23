@@ -1326,6 +1326,8 @@ sudo systemctl enable --now protonvpn-autoconnect.service
 ---
 
 ##  Optional: VPN Proton - WireGuard tool
+https://protonvpn.com/support/wireguard-linux
+
 ```bash
 sudo pacman -S wireguard-tools
 
