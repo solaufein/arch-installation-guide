@@ -1337,6 +1337,11 @@ systemct enable systemd-resolved
 # Download Proton WireGuard .conf files
 # Move the .conf files into /etc/wireguard
 # If using dash '-' then rename files because it is an issue
+
+nmcli connection import type wireguard file /etc/wireguard/wg0.conf
+nmcli conn up [connection]
+nmcli conn down [connection]
+nmcli conn
 ```
 
 ---
